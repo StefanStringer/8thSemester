@@ -6,19 +6,15 @@ LDLIBS   := -lm #Math library
 
 all: main
 
-# Build the final executable
 main: main.o sfuns.o
 	$(CXX) $(LDLIBS) -o $@ $^
 
-# Compile each .cc file into an object file
 %.o: %.cc sfuns.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-# Convenience: rebuild everything from scratch
 clean:
 	rm -f *.o main
 
-# Run the program and capture its output
 run: main
 	./main > Out.txt
 
