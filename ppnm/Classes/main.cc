@@ -7,7 +7,11 @@ int main(){
     hello();
     double a = 1.0;
     double b = a;
+    if(a==b) {std::printf"a==b\n";}
+    else {std::printf"a!=b\n";}
     std::vector<double> v {1,2,3};
+    for(size_t i=0;i<v.size();i++)std::printf("%g ",v[i]);
+    std::printf("\n");
     auto u = v;
     auto& w=v; // placing & is a reference
 return 0;
