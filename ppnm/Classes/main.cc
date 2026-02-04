@@ -1,6 +1,7 @@
 #include<iostream>
 #include<vector>
 #include<cstdio>
+#include"vec.h"
 //#include<hello.h>
 
 int main(){
@@ -20,16 +21,17 @@ int main(){
     // auto& w=v; // placing & is a reference
     size_t i=0;
     while(i<v.size()){
-        std::cout << ("%g ",v[i]) << std::endl;
+        std::cout << v[i] << std::endl;
         i+=1;
     }
     i=0;
-    do{std::cout << ("%g ",v[i]) << std::endl;
+    do{std::cout << v[i] << std::endl;
     i+=1;
     }while(i<v.size());
-    std::cout << ("\n") << std::endl;
+    std::cout << "\n" << std::endl;
 
-    pp::vec d {1,2,3};
-    std::cout << d.x << std::endl;
+    pp::vec j {1,2,3};
+    j.x = 6;
+    std::cout << j.x << std::endl;
 return 0;
 }
