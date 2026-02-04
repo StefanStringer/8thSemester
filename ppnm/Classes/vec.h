@@ -1,11 +1,9 @@
 // vec.h
 #pragma once
 
-#include <cstddef>               // for size_t if you need it
-#include <string> 
-// #include<string>
-// #include<iostream>
-// #include<cstdio>
+#include<string>
+#include<iostream>
+#include<cstdio>
 namespace pp{
 	struct vec{
 		double x,y,z;
