@@ -1,7 +1,7 @@
-#include<iostream>
-#include<vector>
-#include<cstdio>
-#include"vec.h"
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include "vec.h"  
 //#include<hello.h>
 
 int main(){
@@ -30,8 +30,10 @@ int main(){
     }while(i<v.size());
     std::cout << "\n" << std::endl;
 
-    pp::vec j {1,2,3};
+    pp::vec j{1,2,3};
     j.x = 6;
-    std::cout << j.x << std::endl;
+    std::cout << j.x <<" "<< j.y <<" "<< j.z << "\n";
+    // b=std::ref(j); // fuck ????
+
 return 0;
 }
