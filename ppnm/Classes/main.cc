@@ -28,6 +28,8 @@ int main(){
     i+=1;
     }while(i<v.size());
     std::cout << ("\n") << std::endl;
-    
+
+    pp::vec d {1,2,3};
+    std::cout << d.x << std::endl;
 return 0;
 }
