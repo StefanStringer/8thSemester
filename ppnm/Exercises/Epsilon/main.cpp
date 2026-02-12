@@ -105,13 +105,13 @@ int main() {
     double tighterAcc = 1e-12;
     double tighterEps = 1e-12;
     bool sameTight = approx(d1, d2, tighterAcc, tighterEps);
-    std::cout << "\nWith tighter tolerances (acc = eps = 1e‑12):\n";
+    std::cout << "\nWith tighter tolerances of (acc = eps = 1e‑12):\n";
     std::cout << (sameTight ? "≈" : "≠") << '\n';
 
     double looserAcc = 1e-6;
     double looserEps = 1e-6;
     bool sameLoose = approx(d1, d2, looserAcc, looserEps);
-    std::cout << "\nWith looser tolerances (acc = eps = 1e‑6):\n";
+    std::cout << "\nWith relaxed tolerances of (acc = eps = 1e‑6):\n";
     std::cout << (sameLoose ? "≈" : "≠") << '\n';
 
     return 0;
