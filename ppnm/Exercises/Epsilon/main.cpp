@@ -20,6 +20,9 @@ bool approx(double a, double b,
 
 int main() {
     //machine epsilon
+
+    std::cout << "Part 1: machine epsilon\n" << std::endl;
+
     float       f=1.0;
     while((float)      (1.0+f) != 1.0){
         f/=2.0;
@@ -37,20 +40,28 @@ int main() {
         l/=2.0;
     } l*=2.0;
 
-    // std::printf("      float eps=%g\n",f);
-    // std::printf("     double eps=%g\n",d);
-    // std::printf("long double eps=%Lg\n",l);
+    //Here the simulated epsiolon is printed
+    std::printf("      float eps=%g\n",f);
+    std::printf("     double eps=%g\n",d);
+    std::printf("long double eps=%Lg\n",l);
 
-    // std::cout << std::numeric_limits<float>::epsilon() << "\n";
-    // std::cout << std::numeric_limits<double>::epsilon() << "\n";
-    // std::cout << std::numeric_limits<long double>::epsilon() << "\n";
+    //Here the machine epsilon from the library is printed
+    std::cout << std::numeric_limits<float>::epsilon() << "\n";
+    std::cout << std::numeric_limits<double>::epsilon() << "\n";
+    std::cout << std::numeric_limits<long double>::epsilon() << "\n";
+
+    // Here the calculated machine epislon is done
+    std::cout << "Calculated epsilon double = " << std::pow(2,-52) << std::endl;
+    std::cout << "Calculated epsilon float =  " << std::pow(2,-52) << std::endl;
 
     // float a = 1.0f + f + f; // should be 1+epsilon, that is, larger than 1, no?
     // float b = f + f + 1.0f; // should be the same mathematically, no?
     // std::printf("a=%g\n", a);
     // std::printf("b=%g\n", b);
 
-    // 2 Non-commutativity of addition
+
+    // Part 2 Non-commutativity of addition
+    std::cout << "\nPart 2: non-commutativity of addition\n" << std::endl;
     double epsilon=std::pow(2,-52);
     double tiny=epsilon/2;
     double a=1+tiny+tiny;
@@ -65,7 +76,9 @@ int main() {
     std::cout << "1+tiny+tiny=" << a << "\n";
     std::cout << "tiny+tiny+1=" << b << "\n";
 
-    // Comparing doubles: introduction
+    //Part 3 Comparing doubles: introduction
+    std::cout << "\nPart 3: comparing doubles\n" << std::endl;
+    
     double do1 = 0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1;
     double do2 = 8*0.1;
 
