@@ -5,6 +5,7 @@
 #include <iostream>
 
 int main() {
+    //LEcture stuff
     // ----- Constructors -------------------------------------------------
     vec a{1.0, 2.0, 3.0};          // parameterized
     vec b;                         // default (0,0,0)
@@ -53,5 +54,22 @@ int main() {
               << "i = " << i << "\n"
               << "j = " << j << "\n";
 
+    //Exercises here
+    vec v = vec(1.0, 2.0, 3.0);
+    vec w = vec(4.0, 5.0, 6.0);
+
+    std::cout << "\n Display Vectors v and w: \n";
+    std::cout << "v = " << v << "\n";
+    std::cout << "w = " << w << "\n";
+    
+    std::cout << "Vector addition (v + w): " << v + w << "\n";
+    std::cout << "Vector subtraction (v - w): " << v - w << "\n";
+    std::cout << "Scalar multiplication (v * 2.0): " << v * 2.0 << "\n";
+    std::cout << "Scalar multiplication (2.0 * v): " << 2.0 * v << "\n";
+    std::cout << "Scalar division (v / 2.0): " << v / 2.0 << "\n";
+    std::cout << "Norm of v: " << v.norm() << "\n"; 
+    std::cout << "Dot product of v and w: " << v.dot(w) << "\n";
+    std::cout << "Cross product of v and w: " << v.cross(w) << "\n";
+    
     return 0;
 }

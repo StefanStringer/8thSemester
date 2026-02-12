@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include<cmath>
 
 struct vec {
     double x, y, z;
@@ -28,6 +29,26 @@ struct vec {
 
     // stream output
     friend std::ostream& operator<<(std::ostream&, const vec&);
+
+    // dot-product
+    double dot(const vec& b) {
+        double sum = x * b.x + y * b.y + z * b.z;
+        return sum;
+    }
+
+    // cross-product
+    vec cross(const vec& b) {
+        double new_x = y * b.z - z * b.y;
+        double new_y = z * b.x - x * b.z;
+        double new_z = x * b.y - y * b.x;
+        return vec(new_x, new_y, new_z);
+    }
+
+    // norm
+    double norm() {
+        double length = std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
+        return length;
+    }
 };
 
 // non-member operators
