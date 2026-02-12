@@ -1,22 +1,27 @@
-CXX      := g++
-CXXFLAGS := -Wall -Wextra -std=c++20 -O2
-LDLIBS   := -lm
+CXX = g++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++23 -O2
+LDLIBS = -lm
 
-all: main
+# run: main
+# 	./main $(ARGS)
 
-main: main.o sfuns.o
-	$(CXX) -o $@ $^ $(LDLIBS)
-
-%.o: %.cpp sfuns.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-%.o: %.cc sfuns.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-clean:
-	rm -f *.o main
-
-run: main
+Out.txt: main
 	./main > Out.txt
 
-.PHONY: all clean run
+main: main.o sfuns.o
+	$(CXX) $^ $(LDLIBS) -o main
+
+main.o: main.cc sfuns.h
+	$(CXX) $(CXXFLAGS) -c main.cc
+
+sfuns.o: sfuns.cc sfuns.h
+	$(CXX) $(CXXFLAGS) -c sfuns.cc
+
+.PHONY: clean
+clean:
+	$(RM) -f main main.o sfuns.o Out.txt
+
+test:
+	@echo $(CXX)
+	@echo $(CXXFLAGS)
+	@echo $(RM)
