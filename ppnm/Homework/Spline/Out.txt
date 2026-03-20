@@ -1,0 +1,6 @@
+Question A: Linear spline
+
+Question B: Quadratic spline
+
+Question C: Cubic spline
+

@@ -1,13 +1,14 @@
+//My imports
 #include "matrix.hpp"
 #include "qr.hpp"
-
+//imports needed
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <functional>
 #include <cmath>
 #include <tuple>
-
+//the namespace copied again from eigenvalue homewrok
 using namespace Eigenvalues;
 
 /*------------------------------------------------------------
@@ -16,9 +17,9 @@ using namespace Eigenvalues;
 
 const int n = 9;
 
-double tdata[n]  ={1,2,3,4,6,9,10,13,15};
-double ydata[n]  ={117,100,88,72,53,29.5,25.2,15.2,11.1};
-double dydata[n] ={6,5,4,4,4,3,3,2,2};
+double tdata[n]  ={1, 2, 3, 4, 6, 9, 10, 13, 15};
+double ydata[n]  ={117, 100, 88, 72, 53, 29.5, 25.2, 15.2, 11.1};
+double dydata[n] ={6, 5, 4, 4, 4, 3, 3, 2, 2};
 
 
 /*============================================================
@@ -207,10 +208,7 @@ void questionC(){
 }
 
 
-/*============================================================
-  MAIN PROGRAM
-============================================================*/
-
+// was nicer to just write the main lie k this
 int main(){
 
     questionA();
