@@ -57,6 +57,12 @@ struct matrix{
 struct vector {
     std::vector<double> data;
 
+    auto begin() { return data.begin(); }
+    auto end() { return data.end(); }
+
+    auto begin() const { return data.begin(); }
+    auto end() const { return data.end(); }
+
     vector() = default;
     vector(size_t n) : data(n) {}
 

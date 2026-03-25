@@ -7,32 +7,32 @@ namespace ode {
 /* =========================================
    RK stepper (Euler/Midpoint embedded)
 ========================================= */
-std::pair<vector,vector> rkstep12(
-    std::function<vector(double,const vector&)> f,
-    double x,
-    const vector& y,
-    double h
+std::pair<vector,vector> rkstep12( //pair used instead of tuple like in his example
+    std::function<vector(double,const vector&)> f, /* the f from dy/dx=f(x,y) */
+    double x, /* the current value of the variable */
+    const vector& y, /* the current value y(x) of the sought function */
+    double h /* the step to be taken */
 ){
-    vector k0 = f(x, y);
-    vector k1 = f(x + h/2, y + k0*(h/2));
+    vector k0 = f(x, y); /* embedded lower order formula (Euler) */
+    vector k1 = f(x + h/2, y + k0*(h/2));  /* higher order formula (midpoint) */
 
-    vector yh = y + k1*h;        // higher order estimate
-    vector dy = (k1 - k0)*h;     // error estimate
+    vector yh = y + k1*h;        /* y(x+h) estimate */
+    vector dy = (k1 - k0)*h;    /* error estimate */
 
-    return {yh, dy};
+    return {yh, dy}; //changed from the std::make_tuple method 
 }
 
 /* =========================================
    Adaptive driver
 ========================================= */
 std::pair<std::vector<double>, std::vector<vector>> driver(
-    std::function<vector(double,const vector&)> f,
-    double a,
-    double b,
-    const vector& y0,
-    double h,
-    double acc,
-    double eps
+    std::function<vector(double,const vector&)> f, /* the f from dy/dx=f(x,y) */
+    double a, /* the initial value of the variable */
+    double b, /* the final value of the variable */
+    const vector& y0,/* y(initial-point) */
+    double h, /* initial step-size */ //removed default value as it causes errors
+    double acc, /* absolute accuracy goal */
+    double eps /* relative accuracy goal */
 ){
     double x = a;
     vector y = y0;

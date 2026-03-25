@@ -69,26 +69,73 @@ void plotSVG(const std::string &filename,
     file.close();
 }
 
-void QuestionA() {
-    std::cout << "=== Question A: Harmonic Oscillator ===\n";
+void QuestionA(){
+    using vec = Eigenvalues::vector;
 
-    vector y0(2);
-    y0[0] = 1.0;
-    y0[1] = 0.0;
+    /* =========================
+       1. Harmonic oscillator
+    ========================= */
+    {
+        auto f = [](double x, const vec& y){
+            vec dydx(2);
+            dydx[0] = y[1];
+            dydx[1] = -y[0];
+            return dydx;
+        };
 
-    auto f = [](double t, const vector& y) -> vector {
-        vector dy(2);
-        dy[0] = y[1];
-        dy[1] = -y[0];
-        return dy;
-    };
+        vec y0(2);
+        y0[0] = 1;
+        y0[1] = 0;
 
-    double a = 0.0, b = 10.0, h = 0.1, acc = 1e-6, eps = 1e-6;
+        auto [xlist, ylist] = ode::driver(f, 0, 10, y0, 0.1, 1e-3, 1e-3);
 
-    auto [xlist, ylist] = driver(f, a, b, y0, h, acc, eps);
+        plotSVG("harmonic.svg", xlist, ylist, 800, 600);
+    }
 
-    plotSVG("QuestionA.svg", xlist, ylist);
-    std::cout << "SVG plot saved to QuestionA.svg\n";
+    /* =========================
+       2. Damped oscillator
+    ========================= */
+    {
+        double gamma = 0.5;
+
+        auto f = [gamma](double x, const vec& y){
+            vec dydx(2);
+            dydx[0] = y[1];
+            dydx[1] = -y[0] - gamma*y[1];
+            return dydx;
+        };
+
+        vec y0(2);
+        y0[0] = 1;
+        y0[1] = 0;
+
+        auto [xlist, ylist] = ode::driver(f, 0, 10, y0, 0.1, 1e-3, 1e-3);
+
+        plotSVG("damped.svg", xlist, ylist, 800, 600);
+    }
+
+    /* =========================
+       3. Exponential decay
+    ========================= */
+    {
+        auto f = [](double x, const vec& y){
+            vec dydx(1);
+            dydx[0] = -y[0];
+            return dydx;
+        };
+
+        vec y0(1);
+        y0[0] = 1;
+
+        auto [xlist, ylist] = ode::driver(f, 0, 5, y0, 0.1, 1e-3, 1e-3);
+
+        plotSVG("decay.svg", xlist, ylist, 800, 600);
+    }
+
+    std::cout << "Question A plots generated:\n";
+    std::cout << " - harmonic.svg\n";
+    std::cout << " - damped.svg\n";
+    std::cout << " - decay.svg\n";
 }
 
 // ====================================
