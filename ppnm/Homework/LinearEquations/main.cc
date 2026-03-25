@@ -58,6 +58,22 @@ int main(int argc, char** argv)
     std::cout << "Homework: Linear Equations \n";
     std::cout << "==================================================\n\n";
 
+    /* ============================================================
+    Timing mode for QR decomposition
+    ============================================================ */
+
+    if(argc==3 && std::string(argv[1])=="-size"){
+
+        int N = std::stoi(argv[2]);
+
+        lineq::matrix A = random_matrix(N,N);
+
+        // only perform QR decomposition (this is what we measure)
+        lineq::QR qr(A);
+
+        return 0; // exit immediately (no printing)
+    }
+
     std::cout << "\n=========================================================\n";
     std::cout << "PART A: A Matrix, Decomposition functions and Linear Solve\n";
     std::cout << "===========================================================\n\n";
@@ -172,6 +188,13 @@ int main(int argc, char** argv)
     lineq::approx(Icheck, lineq::matrix::id(size));
     //bool is_identity = lineq::approx(Icheck, lineq::matrix::id(size)) < 1e-10;
     //std::cout << "\nA * A^{-1} ≈ I: " << (is_identity ? "TRUE" : "FALSE") << "\n"; //THis KEEPS PRINTING FALSE, but the matrices look correct. I think the approximation is just not good enough. I will check this again later.
+
+
+    std::cout << "\n==================================================\n";
+    std::cout << "PART C: Operations count for QR decomposition \n";
+    std::cout << "==================================================\n\n";
+
+    std::cout << "This runs automatically and a plot, fig_QR_timing.svg, shows the time\n\n";
 
     std::cout << "\n==================================================\n";
     std::cout << "DONE :) \n";
