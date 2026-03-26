@@ -1,5 +1,0 @@
-Question A plots generated:
- - harmonic.svg
- - damped.svg
- - decay.svg
-=== Question B: Relativistic Precession of Planetary Orbit ===
