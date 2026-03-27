@@ -1,0 +1,26 @@
+=== PART A: Basic Integrals & Error Function ===
+sqrt(x) | Integral = 0.66668093 | EstErr = 0.00007174
+1/sqrt(x) | Integral = 1.99999989 | EstErr = 0.00006900
+sqrt(1-x^2) | Integral = 0.78540631 | EstErr = 0.00006030
+ln(x)/sqrt(x) | Integral = -3.99999813 | EstErr = 0.00008725
+
+Error function tests:
+my_erf(-1.00000000) = -0.84270079
+my_erf(-0.50000000) = -0.52049988
+my_erf(0.00000000) = 0.00000000
+my_erf(0.50000000) = 0.52049988
+my_erf(1.00000000) = 0.84270079
+my_erf(1.50000000) = 0.96610535
+my_erf(2.00000000) = 0.99532231
+
+=== PART B: Clenshaw-Curtis & Infinite Limits ===
+sqrt(x) | CC = 0.66666655 | Plain = 0.66668093
+1/sqrt(x) | CC = 1.99999989 | Plain = 1.99999989
+z^2 integral 0..1 = 0.33333255 | Function calls = 76 | Scipy ~21
+exp(-x^2) -inf..inf = 1.77245485 | Function calls = 144 | Scipy ~277
+
+=== PART C: Difficult Integrals ===
+int_0^pi sin(x)/exp(-x^2) = 570.43576218 | EstErr = 0.00581623
+int_0^inf x/exp(x) = 1.00002009 | EstErr = 0.00006374
+
+Done. Data files: erf.svg.dat, erf_acc.svg.dat
