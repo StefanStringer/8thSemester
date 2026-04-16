@@ -1,0 +1,60 @@
+
+
+*******************************************************************************
+Fri Mar 20 11:00:23 2026
+
+
+FIT:    data read from "out.times.data" using 1:2
+        format = x:z
+        #datapoints = 16
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a*x**3
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 1.3807693580e+04   0.00e+00  2.94e+01    1.000000e-06
+   4 2.2571680222e-04  -3.23e-07  2.94e-03    1.631519e-09
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.000225717
+rel. change during last iteration : -3.22583e-12
+
+degrees of freedom    (FIT_NDF)                        : 15
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00387915
+variance of residuals (reduced chisquare) = WSSR/ndf   : 1.50478e-05
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.63152e-09      +/- 3.296e-11    (2.02%)
+
+
+*******************************************************************************
+Fri Mar 20 11:03:20 2026
+
+
+FIT:    data read from "out.times.data" using 1:2
+        format = x:z
+        #datapoints = 16
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a*x**3
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 1.3802920060e+04   0.00e+00  2.94e+01    1.000000e-06
+   4 4.1125211942e-04  -1.77e-07  2.94e-03    1.804116e-09
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.000411252
+rel. change during last iteration : -1.76938e-12
+
+degrees of freedom    (FIT_NDF)                        : 15
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00523611
+variance of residuals (reduced chisquare) = WSSR/ndf   : 2.74168e-05
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.80412e-09      +/- 4.449e-11    (2.466%)

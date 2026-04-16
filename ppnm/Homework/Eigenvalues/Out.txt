@@ -1,0 +1,83 @@
+
+=============================
+PART 1: JACOBI TEST
+=============================
+
+Random symmetric matrix A:
+ -0.00467267    0.678508   -0.229073    0.102375
+    0.678508   -0.698726   -0.685343    0.617803
+   -0.229073   -0.685343   -0.974185   -0.414915
+    0.102375    0.617803   -0.414915   -0.888013
+Jacobi rotation sweeps used in calc: 5
+Eigenvalues:
+    -1.62436
+    -1.34874
+   -0.420304
+    0.827806
+Eigenvectors V:
+    0.224835    0.117862    -0.73719    0.626186
+   -0.760454   -0.120495    0.248165    0.587881
+   -0.523347    0.661304   -0.378184   -0.381787
+    0.311876    0.730935    0.501938    0.341359
+Diagonal matrix D:
+    -1.62436           0           0           0
+           0    -1.34874           0           0
+           0           0   -0.420304           0
+           0           0           0    0.827806
+Check V*D*V^T:
+ -0.00467267    0.678508   -0.229073    0.102375
+    0.678508   -0.698726   -0.685343    0.617803
+   -0.229073   -0.685343   -0.974185   -0.414915
+    0.102375    0.617803   -0.414915   -0.888013
+Check V^T * V:
+           1-2.77556e-17 2.77556e-17 1.38778e-17
+-2.77556e-17           1           0 2.77556e-17
+ 2.77556e-17           0           1-2.77556e-17
+ 1.38778e-17 2.77556e-17-2.77556e-17           1
+
+=============================
+PART 2: HYDROGEN ATOM
+=============================
+
+Hamiltonian built.
+Jacobi rotation sweeps used in calc: 9
+
+Lowest energies:
+E[0] = -0.489228
+E[1] = -0.11112
+E[2] = 0.0962839
+E[3] = 0.411759
+E[4] = 0.829649
+Exact ground state = -0.5
+
+=============================
+PART 3: SCALING TEST
+=============================
+
+N    Time(s)
+Jacobi rotation sweeps used in calc: 7
+20   0.000113676
+Jacobi rotation sweeps used in calc: 8
+40   0.000818174
+Jacobi rotation sweeps used in calc: 8
+60   0.00257734
+Jacobi rotation sweeps used in calc: 8
+80   0.00675831
+Jacobi rotation sweeps used in calc: 9
+100   0.0110332
+Jacobi rotation sweeps used in calc: 10
+120   0.0192173
+Jacobi rotation sweeps used in calc: 9
+140   0.0330052
+Jacobi rotation sweeps used in calc: 9
+160   0.0767967
+Jacobi rotation sweeps used in calc: 9
+180   0.0787718
+Jacobi rotation sweeps used in calc: 10
+200   0.114553
+
+Expected scaling ~ N^3
+
+Program finished.
+
+ Images printed out can be found in the current folder.

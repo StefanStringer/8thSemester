@@ -1,0 +1,35 @@
+=============================
+Question A: Least Squares Fit
+=============================
+
+Experimental decay model:
+y(t) = a * exp(-lambda * t)
+
+Fitted parameters:
+a      = 142.404
+lambda = 0.170624
+Half-life = 4.06242 days
+
+Modern value for Ra-224 half-life ≈ 3.66 days
+
+===========================================
+Question B: Fit with Uncertainties
+===========================================
+
+Fit coefficients:
+ln(a)   = 4.95866 +/- 0.0354019
+lambda  = 0.170624 +/- 0.00715662
+
+Converted parameter:
+a = 142.404
+
+Half-life = 4.06242 +/- 0.170394 days
+
+===========================================
+Question C: Plot uncertainty variations
+===========================================
+
+Data files written:
+fit_data.txt
+fit_curve.txt
+
