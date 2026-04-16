@@ -6,22 +6,20 @@
 #include <iomanip>
 #include <string>
 
-using Func = std::function<double(double)>;
-
 // Global counter for function calls
 int eval_count = 0;
-Func wrap_counter(Func f) {
+std::function<double(double)> wrap_counter(std::function<double(double)> f) {
     return [f](double x) { eval_count++; return f(x); };
 }
 
 // Recursive adaptive open 4-point integrator
-std::pair<double,double> integrate(Func f, double a, double b,
+std::pair<double,double> integrate(std::function<double(double)> f, double a, double b,
                                    double acc=1e-4, double eps=1e-4,
                                    double f2=std::nan("1"), double f3=std::nan("1"),
                                    int depth=0) {
     if(depth > 1000) return {0, 1e10}; // prevent infinite recursion
 
-    double h = b-a;
+    double h = b - a;
     if(std::isnan(f2)) { f2 = f(a + 2*h/6); f3 = f(a + 4*h/6); }
 
     double f1 = f(a + h/6);
@@ -33,39 +31,39 @@ std::pair<double,double> integrate(Func f, double a, double b,
     double err = std::abs(Q - q);
     double tol = acc + eps*std::abs(Q);
 
-    if(err <= tol) return {Q, err};
-
     double mid = (a+b)/2;
-    auto left  = integrate(f, a, mid, acc/std::sqrt(2), eps, f1, f2, depth+1);
-    auto right = integrate(f, mid, b, acc/std::sqrt(2), eps, f3, f4, depth+1);
-
-    double total = left.first + right.first;
-    double total_err = std::sqrt(left.second*left.second + right.second*right.second);
-    return {total, total_err};
+    if(err <= tol) return {Q, err};
+    else {
+        auto left  = integrate(f, a, mid, acc/std::sqrt(2), eps, f1, f2, depth+1);
+        auto right = integrate(f, mid, b, acc/std::sqrt(2), eps, f3, f4, depth+1);
+        return {left.first + right.first, left.second + right.second}; 
+    }   
 }
 
 // Clenshaw–Curtis transformation + infinite interval support
-std::pair<double,double> integrate_cc(Func f, double a, double b,
+auto integrate_cc(std::function<double(double)> f, double a, double b,
                                       double acc=1e-4, double eps=1e-4) {
     // Infinite limits
-    if(a == -INFINITY && b == INFINITY) {
-        auto g = [&](double t){ return f(std::tan(M_PI*(t-0.5))) * M_PI / std::pow(std::cos(M_PI*(t-0.5)),2); };
-        return integrate(g, 0.0, 1.0, acc, eps);
+    if (a == -INFINITY && b == INFINITY) {
+        auto integrand = [&](double t) {
+            return f(t / (1 - t*t)) * (1 + t*t) / ((1-t*t) * (1-t*t));
+        };
+        return integrate(integrand, -1.0, 1.0, acc, eps);
     }
     if(a == -INFINITY && std::isfinite(b)) {
-        auto g = [&](double t){ return f(b - (1-t)/t) / (t*t); };
-        return integrate(g, 0.0, 1.0, acc, eps);
+        auto integrand = [&](double t){ return f(b - (1-t)/t) / (t*t); };
+        return integrate(integrand, 0.0, 1.0, acc, eps);
     }
     if(std::isfinite(a) && b == INFINITY) {
-        auto g = [&](double t){ return f(a + (1-t)/t) / (t*t); };
-        return integrate(g, 0.0, 1.0, acc, eps);
+        auto integrand = [&](double t){ return f(a + (1-t)/t) / (t*t); };
+        return integrate(integrand, 0.0, 1.0, acc, eps);
     }
 
     // Finite interval: apply Clenshaw–Curtis
     double mid  = (a+b)/2;
     double half = (b-a)/2;
-    auto g = [&](double t){ return f(mid + half*std::cos(t)) * std::sin(t) * half; };
-    return integrate(g, 0.0, M_PI, acc, eps);
+    auto integrand = [&](double t){ return f(mid + half*std::cos(t)) * std::sin(t) * half; };
+    return integrate(integrand, 0.0, M_PI, acc, eps);
 }
 
 // Error function using the adaptive integrator
@@ -93,8 +91,8 @@ std::vector<double> linspace(double start, double stop, int num) {
 int main() {
     std::cout << std::fixed << std::setprecision(8);
 
-    std::cout << "=== PART A: Basic Integrals & Error Function ===\n";
-    // Functions
+    std::cout << "### PART A: Basic Integrals & Error Function ###\n";
+    // Functions that we want to do tests for 
     auto fA = [](double x){ return std::sqrt(x); };
     auto fB = [](double x){ return 1/std::sqrt(x); };
     auto fC = [](double x){ return std::sqrt(1-x*x); };
@@ -117,30 +115,35 @@ int main() {
     auto [I_D,eD] = integrate_cc(fD,a,b);
     std::cout << "ln(x)/sqrt(x) | Integral = " << I_D << " | EstErr = " << eD << "\n";
 
-    std::cout << "\nError function tests:\n";
+    std::cout << "\n ### Error function tests ### \n";
     for(double z=-1.0; z<=2.0; z+=0.5) {
         double val = my_erf(z);
         std::cout << "my_erf(" << z << ") = " << val << "\n";
     }
 
     // Save data for plotting erf(z)
-    std::ofstream f1("erf.svg.dat");
-    auto zs = linspace(-3,3,200);
-    for(auto z : zs) f1 << z << " " << my_erf(z) << "\n";
-    f1.close();
+    std::ofstream erf_data("erf.dat");
+    std::vector<double> zs = linspace(-5, 5, 500);
+    for (int i = 0; i < (int)zs.size(); i++) {
+        double z = zs[i];
+        double vals = erf(z);
+        erf_data << z << " " << vals << "\n";
+    }
+    erf_data.close();
 
     // Save accuracy vs acc for erf(1)
-    std::ofstream f2("erf_acc.svg.dat");
+    std::ofstream arf_acc_data("erf_acc.dat");
     double acc = 0.1;
     double exact = 0.84270079294971486934;
+    std::vector<double> accs(13);
     for(int i=0;i<7;i++){
         double val = my_erf(1.0,0.0,acc);
-        f2 << acc << " " << val << " " << std::abs(val-exact) << "\n";
+        arf_acc_data << acc << " " << val << " " << std::abs(val-exact) << "\n";
         acc /= 10;
     }
-    f2.close();
+    arf_acc_data.close();
 
-    std::cout << "\n=== PART B: Clenshaw-Curtis & Infinite Limits ===\n";
+    std::cout << "\n ### PART B: Clenshaw-Curtis & Infinite Limits ###\n";
 
     eval_count=0;
     auto [CC_A,eCC_A] = integrate_cc(fA,a,b);
