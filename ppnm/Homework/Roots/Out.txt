@@ -1,0 +1,52 @@
+ ################################################################# 
+                            ROOTS                           
+ ################################################################# 
+
+ Question A: Newton's Method on Rosenbrock Function 
+######### Question A: Newton's Method on Rosenbrock Function #########
+
+ debug with 1d equation (x^2 - 4 = 0) 
+starting at: (1)
+Found root at: (2)
+Expected root: (2.0)
+Function value at root: 6.2417e-09
+
+Finding roots of the gradient of the Rosenbrock function:
+f(x,y) = (1-x)^2 + 100*(y-x^2)^2
+Starting at: (-1.2, 1)
+Found root at: (-1.11772, 1.19034)
+Gradient norm at root: 32.7946
+Function value f(x,y): 4.83251
+
+Starting at: (0, 0)
+Found root at: (0.03125, 7.63183e-10)
+Gradient norm at root: 1.93517
+Function value f(x,y): 0.938572
+
+Starting at: (2, 2)
+Found root at: (1.76574, 3.08422)
+Gradient norm at root: 26.1556
+Function value f(x,y): 0.699382
+
+Finding roots of the gradient of the Himmelblau's function:
+f(x,y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2
+Starting at: (3, 2)
+Found root at: (3, 2)
+Gradient norm at root: 8519.81
+Function value f(x,y): 0
+
+Starting at: (-2.80512, 3.13131)
+Found root at: (-2.80512, 3.13131)
+Gradient norm at root: 5406.83
+Function value f(x,y): 1.2748e-27
+
+Starting at: (-3.77931, -3.28319)
+Found root at: (-3.77931, -3.28319)
+Gradient norm at root: 26796.4
+Function value f(x,y): 6.21622e-28
+
+Starting at: (3.58443, -1.84813)
+Found root at: (3.58443, -1.84813)
+Gradient norm at root: 21280.2
+Function value f(x,y): 2.27192e-26
+
