@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <functional>
+#include <iomanip>
 
 using namespace Eigenvalues;
 
@@ -151,6 +152,172 @@ vector rosenbrock_gradient(vector x) {
     return grad;
 }
 
+//Here add for Question B
+//ODE solver for the schrod eq
+
+void solve_scrodinger(double E, double r_min, double r_max,
+    std::vector<double>& r_values, std::vector<double>& f_values,
+    double acc = 1e-8, double eps = 1e-10) {
+    int n = 1000;
+    double dr = (r_max - r_min) / n;
+    r_values.resize(n + 1);
+    f_values.resize(n + 1);
+
+    for (int i = 0; i <= n; i++) {
+        r_values[i] = r_min + i * dr;
+        // f_values[i] = 0.0; // Initialize f_values to zero, will be updated in the loop
+    }
+
+    f_values[0] = r_min - r_min * r_min; // Initial condition f(r_min) = r_min - r_min^2
+
+    double f_prime = 1.0 - 2.0 * r_min; // f'(r_min) = 1 - 2*r_min
+    f_values[1] = f_values[0] + f_prime * dr; // Use the derivative to set the second value
+
+    for (int i = 1; i < n; i++) {
+        double r = r_values[i];
+        double r_prev = r_values[i - 1];
+        double r_next = r_values[i + 1];
+
+        double k2 = 2.0 * (1.0 / r + E);
+        double k2_prev = 2.0 * (1.0 / r_prev + E);
+        double k2_next = 2.0 * (1.0 / r_next + E);
+
+        // Numerov's method
+        f_values[i + 1] = (2.0 * (1.0 - (5.0 * dr * dr * k2 / 12.0)) * f_values[i] - (1.0 + (dr * dr * k2_prev / 12.0)) * f_values[i - 1]) / (1.0 + (dr * dr * k2_next / 12.0));
+        
+        if (std::abs(f_values[i + 1]) > acc) {
+            std::cerr << "Warning: Solution diverging at r = " << r << "\n";
+            break;
+        }
+    }
+}
+
+//shooting function? the M(E) = f_E(r_max)
+double shooting_function(double E, double r_min, double r_max, double acc = 1e-8, double eps = 1e-10) {
+    std::vector<double> r_values, f_values;
+    solve_scrodinger(E, r_min, r_max, r_values, f_values, acc, eps);
+    return f_values.back(); // Return f_E(r_max)
+}
+
+// Bisection method for finding root of M(E) = 0
+double find_ground_state_energy(double r_min, double r_max, 
+                                double E_low = -1.0, double E_high = 0.0,
+                                double tol = 1e-8) {
+    double M_low = shooting_function(E_low, r_min, r_max);
+    double M_high = shooting_function(E_high, r_min, r_max);
+    
+    if (M_low * M_high > 0) {
+        throw std::runtime_error("Root not bracketed! Try different energy bounds.");
+    }
+    
+    int max_iter = 100;
+    for (int iter = 0; iter < max_iter; iter++) {
+        double E_mid = (E_low + E_high) / 2.0;
+        double M_mid = shooting_function(E_mid, r_min, r_max);
+        
+        if (std::abs(M_mid) < tol || (E_high - E_low) < tol) {
+            return E_mid;
+        }
+        
+        if (M_low * M_mid < 0) {
+            E_high = E_mid;
+            M_high = M_mid;
+        } else {
+            E_low = E_mid;
+            M_low = M_mid;
+        }
+    }
+    
+    throw std::runtime_error("Bisection did not converge?");
+}
+
+//placing the optimised newton version under here, so the old one remains
+inline double calc_phi(const vector &fx) {
+    return 0.5 * fx.norm() * fx.norm();
+}
+
+
+vector newton_optimised(std::function<vector(vector)> f, vector start, double acc = 1e-6, vector dx = vector(0)) {
+    vector x = start;
+    vector fx = f(x);
+    
+    int n = x.size();
+    // Allocate Jacobian ONCE outside the loop
+    matrix J(n, n); 
+    
+    double lambda_min = 1e-10;
+    int max_iter = 100;
+    int iter = 0;
+
+    // Initialize dx if not provided
+    if (dx.size() == 0) {
+        dx = vector(n);
+        for (int i = 0; i < n; i++) {
+            dx[i] = std::abs(x[i]) * std::pow(2.0, -26);
+            if (dx[i] == 0) dx[i] = std::pow(2.0, -26);
+        }
+    }
+
+    double phi_0 = calc_phi(fx);
+    double dphi_0 = -2.0 * phi_0; // Derivative of phi at lambda=0
+
+    while (iter < max_iter) {
+        if (fx.norm() < acc) break;
+
+        // 1. Compute Jacobian (reuses allocated memory)
+        J = jacobian(f, x, fx, dx);
+
+        // 2. Solve J * delta = -fx
+        QRResult qr = qr_decomposition(J);
+        vector delta = qr.solve(-fx);
+
+        // Check for convergence based on step size
+        if (delta.norm() < dx.norm() * 1e-3) break;
+
+        // 3. Quadratic Interpolation Line Search
+        double lambda = 1.0;
+        vector z;
+        vector fz;
+
+        while (true) {
+            z = x + delta * lambda;
+            fz = f(z);
+            double phi_new = calc_phi(fz);
+
+            // Armijo condition
+            if (fz.norm() < (1.0 - lambda / 2.0) * fx.norm()) {
+                break; // Step accepted
+            }
+
+            if (lambda < lambda_min) {
+                break; // Accept bad step if too small
+            }
+
+            // Quadratic Interpolation
+            double c = (phi_new - phi_0 - dphi_0 * lambda) / (lambda * lambda);
+            double lambda_next;
+
+            if (std::abs(c) < 1e-15 || c <= 0) {
+                lambda_next = lambda / 2.0; // Fallback to halving
+            } else {
+                lambda_next = -dphi_0 / (2.0 * c);
+            }
+
+            // Safety: Ensure step size decreases
+            if (lambda_next >= lambda) {
+                lambda_next = lambda / 2.0;
+            }
+
+            lambda = lambda_next;
+        }
+
+        x = z;
+        fx = fz;
+        iter++;
+    }
+    return x;
+}
+
 void QuestionA() {
     std::cout << "######### Question A: Newton's Method on Rosenbrock Function #########\n\n";
     
@@ -219,6 +386,79 @@ void QuestionA() {
     }
 }
 
+void QuestionB() {
+    std::cout << "######### Question B: Hydrogen Atom Bound States #########\n\n";
+    
+    double r_min = 1e-6;
+    double r_max = 8.0;
+    double acc = 1e-8;
+    double eps = 1e-10;
+
+    std::cout << "Finding ground state energy:\n";
+    std::cout << "r_min = " << r_min << ", r_max = " << r_max << "\n";
+    
+    try {
+        double E0 = find_ground_state_energy(r_min, r_max);
+
+        std::cout << "Estimated ground state energy E0: " << E0 << "\n";
+        std::cout << "Expected ground state energy for hydrogen atom: -0.5\n";
+
+        std::vector<double> r_values, f_values;
+        solve_scrodinger(E0, r_min, r_max, r_values, f_values, acc, eps);
+
+        //Get the wavefunctions
+        std::cout << "Wavefunction values at selected r:\n";
+        for (size_t i = 0; i < r_values.size(); i += r_values.size() / 10) {
+            std::cout << "r = " << r_values[i] << ", f(r) = " << f_values[i] << "\n";
+        }
+
+        //convergence check
+        std::cout << "Checking convergence of the solution:\n";
+        
+
+        // Vary r_max
+        std::cout << "\nEffect of r_max:\n";
+        std::cout << std::setw(10) << "r_max" << std::setw(15) << "E0" 
+                  << std::setw(15) << "Error\n";
+        for (double rm : {4.0, 6.0, 8.0, 10.0, 12.0}) {
+            double E_test = find_ground_state_energy(r_min, rm, -1.0, 0.0, 1e-8);
+            std::cout << std::setw(10) << rm 
+                      << std::setw(15) << std::setprecision(8) << E_test
+                      << std::setw(15) << std::abs(E_test - (-0.5)) << "\n";
+        }
+        
+        // Vary r_min
+        std::cout << "\nEffect of r_min:\n";
+        std::cout << std::setw(10) << "r_min" << std::setw(15) << "E0" 
+                  << std::setw(15) << "Error\n";
+        for (double rm : {1e-2, 1e-4, 1e-6, 1e-8}) {
+            double E_test = find_ground_state_energy(rm, r_max, -1.0, 0.0, 1e-8);
+            std::cout << std::setw(10) << rm 
+                      << std::setw(15) << std::setprecision(8) << E_test
+                      << std::setw(15) << std::abs(E_test - (-0.5)) << "\n";
+        }
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error in Question B: " << e.what() << "\n";
+    }
+    
+}
+
+void QuestionC() {
+    std::cout << "######### Question C: Optimised Newton with Quadratic Line Search #########\n\n";
+    
+    // Test on Rosenbrock again
+    std::cout << "Testing optimised Newton on Rosenbrock:\n";
+    vector start({-1.2, 1.0});
+    
+    vector root = newton_optimised(rosenbrock_gradient, start, 1e-8);
+    
+    std::cout << "Found root at: (" << root[0] << ", " << root[1] << ")\n";
+    std::cout << "Gradient norm: " << rosenbrock_gradient(root).norm() << "\n";
+    std::cout << "Function value: " << (std::pow(1.0 - root[0], 2) + 100.0 * std::pow(root[1] - root[0]*root[0], 2)) << "\n";
+    
+}
+
 int main() {
     std::ofstream outFile("Out.txt");
     if (!outFile.is_open()) {
@@ -232,7 +472,14 @@ int main() {
     
     std::cout << " Question A: Newton's Method on Rosenbrock Function \n";
     QuestionA();
+
+    std::cout << " Question B: ODE Solver for the Schrödinger Equation \n";
+    QuestionB();
     
+    std::cout << " Question C: Optimized Newton with Quadratic Line Search \n";
+    QuestionC();
+
+
     std::cout.rdbuf(old);
     outFile.close();
     

@@ -1,7 +1,5 @@
  ################################################################# 
                             ROOTS                           
- ################################################################# 
-
  Question A: Newton's Method on Rosenbrock Function 
 ######### Question A: Newton's Method on Rosenbrock Function #########
 
@@ -50,3 +48,45 @@ Found root at: (3.58443, -1.84813)
 Gradient norm at root: 21280.2
 Function value f(x,y): 2.27192e-26
 
+ Question B: ODE Solver for the Schrödinger Equation 
+######### Question B: Hydrogen Atom Bound States #########
+
+Finding ground state energy:
+r_min = 1e-06, r_max = 8
+Estimated ground state energy E0: -0.5
+Expected ground state energy for hydrogen atom: -0.5
+Wavefunction values at selected r:
+r = 1e-06, f(r) = 9.99999e-07
+r = 0.800001, f(r) = 0
+r = 1.6, f(r) = 0
+r = 2.4, f(r) = 0
+r = 3.2, f(r) = 0
+r = 4, f(r) = 0
+r = 4.8, f(r) = 0
+r = 5.6, f(r) = 0
+r = 6.4, f(r) = 0
+r = 7.2, f(r) = 0
+r = 8, f(r) = 0
+Checking convergence of the solution:
+
+Effect of r_max:
+     r_max             E0         Error
+         4           -0.5              0
+         6           -0.5              0
+         8           -0.5              0
+        10           -0.5              0
+        12           -0.5              0
+
+Effect of r_min:
+     r_min             E0         Error
+      0.01           -0.5              0
+    0.0001           -0.5              0
+     1e-06           -0.5              0
+     1e-08           -0.5              0
+ Question C: Optimized Newton with Quadratic Line Search 
+######### Question C: Optimised Newton with Quadratic Line Search #########
+
+Testing optimised Newton on Rosenbrock:
+Found root at: (-1.0783301, 1.2814714)
+Gradient norm: 52.681651
+Function value: 5.727845
