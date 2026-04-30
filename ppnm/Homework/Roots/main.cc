@@ -478,7 +478,8 @@ int main() {
     
     std::cout << " Question C: Optimized Newton with Quadratic Line Search \n";
     QuestionC();
-
+    std::cout << " ################################################################# \n";
+    
 
     std::cout.rdbuf(old);
     outFile.close();
