@@ -1,0 +1,62 @@
+######### Homework: Minimisation #########
+
+######### Question A: #########
+
+######### Question A: Newton minimisation #########
+
+Testing on Rosenbrock function:
+f(x,y) = (1-x)^2 + 100(y-x^2)^2
+Expected minimum: (1.0, 1.0)
+
+Start: (-1.01, 1.01)
+Converged: No (Max Iterations or Stuck)
+Iterations: 10000
+Final Gradient Norm: 1.125382e+01
+Found minimum at: (-0.346499, 0.171711)
+Function value at minimum: 2.07983
+
+Testing on Himmelblau's function:
+f(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2
+Has 4 minima. Testing different starts...
+
+Starting at: (3, 2)
+Converged: Yes
+Iterations: 0
+Final Gradient Norm: 4.493867e-14
+Found minimum at: (3, 2)
+Function value at minimum: 0
+
+Starting at: (-2.8, 3.1)
+Converged: Yes
+Iterations: 4
+Final Gradient Norm: 4.726215e-11
+Found minimum at: (-2.80512, 3.13131)
+Function value at minimum: 1.71673e-23
+
+Starting at: (-3.8, -3.3)
+Converged: Yes
+Iterations: 5
+Final Gradient Norm: 4.918487e-11
+Found minimum at: (-3.77931, -3.28319)
+Function value at minimum: 9.79146e-24
+
+Starting at: (3.6, -1.8)
+Converged: Yes
+Iterations: 4
+Final Gradient Norm: 7.297409e-09
+Found minimum at: (3.58443, -1.84813)
+Function value at minimum: 2.52991e-19
+
+
+#################################################################
+
+######### Question B: #########
+
+
+#################################################################
+
+######### Question C: #########
+
+
+#################################################################
+
