@@ -1,4 +1,5 @@
-######### Homework: Minimisation #########
+Results written to Out.txt
+ation #########
 
 ######### Question A: #########
 
@@ -52,6 +53,24 @@ Function value at minimum: 2.52991e-19
 
 ######### Question B: #########
 
+######### Question B: Higgs Boson Fit #########
+
+Reading data from stdin...
+Loaded 30 data points.
+Initial guess: m=125, Gamma=1.0, A=5.0
+Running Newton Minimization...
+Converged: Yes
+Iterations: 31
+Final Gradient Norm: 3.623426e-07
+
+--- Fit Results ---
+Mass (m): 125.97 GeV
+Width (Gamma): 2.0863 GeV
+Amplitude (A): 9.8762
+Final Chi-squared: 2.6870e+01
+
+Generating plot data...
+Data saved to higgs_fit.dat
 
 #################################################################
 

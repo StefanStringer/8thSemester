@@ -17,35 +17,7 @@ using namespace Eigenvalues;
 //         gφ[i]=(φ(x)-φx)/dxi
 //         x[i]-=dxi
 //     return gφ
-// vector gradient_fwd(std::function<double(vector)> phi, vector x) {
-//     int n = x.size();
-//     vector g(n);
-//     double phi_x = phi(x);
 
-//     for (int i = 0; i < n; i++) {
-//         double dxi = (1.0 + std::abs(x[i])) * std::pow(2.0, -26);
-//         x[i] += dxi;
-//         g[i] = (phi(x) - phi_x) / dxi;
-//         x[i] -= dxi;
-//     }
-//     return g;
-// }
-
-// vector gradient_mid(std::function<double(vector)> phi, vector x) {
-//     int n = x.size();
-//     vector g(n);
-
-//     for (int i = 0; i < n; i++) {
-//         double dxi = (1.0 + std::abs(x[i])) * std::pow(2.0, -26);
-//         vector x_plus = x;
-//         vector x_minus = x;
-//         x_plus[i] += dxi;
-//         x_minus[i] -= dxi;
-
-//         g[i] = (phi(x_plus) - phi(x_minus)) / (2.0 * dxi);
-//     }
-//     return g;
-// }
 vector gradient(std::function<double(vector)> phi, vector x) {
     int n = x.size();
     vector g(n);
@@ -91,46 +63,6 @@ matrix hessian(std::function<double(vector)> phi, vector x) {
 //         for i in range(len(x)) : H[i,j]=dgφ[i]/dxj
 //         x[j]-=dxj
 // return H
-// matrix hessian_fwd(std::function<double(vector)> phi, vector x) {
-//     int n = x.size();
-//     matrix H(n, n);
-//     vector g_x = gradient_fwd(phi, x);
-
-//     for (int j = 0; j < n; j++) {
-//         double dxj = (1.0 + std::abs(x[j])) * std::pow(2.0, -13);
-//         vector x_plus = x;
-//         x_plus[j] += dxj;
-
-//         vector g_plus = gradient_fwd(phi, x_plus);
-
-//         for (int i = 0; i < n; i++) {
-//             H(i, j) = (g_plus[i] - g_x[i]) / dxj;
-//         }
-//     }
-//     return H;
-// }
-
-// matrix hessian_mid(std::function<double(vector)> phi, vector x) {
-//     int n = x.size();
-//     matrix H(n, n);
-    
-//     for (int j = 0; j < n; j ++) {
-//         double dxj = (1.0 + std::abs(x[j])) * std::pow(2.0, -13);
-//         vector x_plus = x;
-//         vector x_minus = x;
-//         x_plus[j] += dxj;
-//         x_minus[j] -= dxj;
-
-//         vector g_plus = gradient_mid(phi, x_plus);
-//         vector g_minus = gradient_mid(phi, x_minus);
-
-//         for (int i = 0; i < n; i++) {
-//             H(i, j) = (g_plus[i] - g_minus[i]) / (2.0 * dxj);
-//         }
-//     }
-//     return H;
-// }
-
 
 //The QR Decomp thing whihc is from roots homework
 struct QRResults {
@@ -261,42 +193,6 @@ vector newton_minimise(std::function<double(vector)> phi, vector x, double acc =
     return x;
 }
 
-// vector newton_minimise(std::function<double(vector)> phi, vector x, double acc = 1e-3) {
-//     int max_iter = 1000;
-//     int iter = 0;
-
-//     while (iter < max_iter) {
-
-//         vector g = gradient_mid(phi, x);
-
-//         if (g.norm() < acc) break;
-
-//         matrix H = hessian_mid(phi, x);
-
-//         int n = H.size1();
-//         for (int i = 0; i < n; i++) {
-//             H(i, i) += 1e-6;
-//         }
-
-//         QRResults qr = qr_decomposition(H);
-//         vector dx = qr.solve(g * 1.0);
-
-//         double lambda = 1.0;
-//         double phi_x = phi(x);
-
-//         while (lambda >= 1.0 / 1024.0) {
-//             vector x_new = x + dx * lambda;
-//             if (phi(x_new) < phi_x) {
-//                 break;
-//             }
-//             lambda /= 2.0;
-//         }
-//         x = x + dx * lambda;
-//         iter++;
-//     }
-//     return x;
-// }
-
 //functons to find minimums for:
 
 double rosenbrock_scalar(vector x) {
@@ -351,8 +247,96 @@ void QuestionA() {
     }
 }
 
+void QuestionB() {
+    std::cout << "######### Question B: Higgs Boson Fit #########\n\n";
+    std::vector<double> energy, signal, error;
+    double x, y, z;
+    
+    std::cout << "Reading data from stdin...\n";
+    while (std::cin >> x >> y >> z) {
+        energy.push_back(x);
+        signal.push_back(y);
+        error.push_back(z);
+    }
 
-void QuestionB();
+    if (energy.empty()) {
+        std::cerr << "Error: No data read from stdin. Usage: ./main < higgs.data.txt\n";
+        return;
+    }
+
+    std::cout << "Loaded " << energy.size() << " data points.\n";
+
+    // Lambda captures 'energy', 'signal', 'error' by reference automatically
+    auto chi2_func = [&](vector params) -> double {
+        double m = params[0];
+        double gamma = params[1];
+        double A = params[2];
+        double chi2 = 0.0;
+        
+        for (size_t i = 0; i < energy.size(); ++i) {
+            double E = energy[i];
+            double sigma_obs = signal[i];
+            double err = error[i];
+            
+            double denom = (E - m) * (E - m) + (gamma * gamma) / 4.0;
+            if (denom == 0) return 1e20; 
+            double sigma_model = A / denom;
+            
+            double residual = (sigma_model - sigma_obs) / err;
+            chi2 += residual * residual;
+        }
+        return chi2;
+    };
+
+    vector start_params({125.0, 1.0, 5.0});
+    
+    std::cout << "Initial guess: m=125, Gamma=1.0, A=5.0\n";
+    std::cout << "Running Newton Minimization...\n";
+
+    vector best_params = newton_minimise(chi2_func, start_params, 1e-6);
+
+    double best_m = best_params[0];
+    double best_gamma = best_params[1];
+    double best_A = best_params[2];
+    double final_chi2 = chi2_func(best_params);
+
+    std::cout << "\n--- Fit Results ---\n";
+    std::cout << "Mass (m): " << std::fixed << std::setprecision(2) << best_m << " GeV\n";
+    std::cout << "Width (Gamma): " << std::fixed << std::setprecision(4) << best_gamma << " GeV\n";
+    std::cout << "Amplitude (A): " << std::fixed << std::setprecision(4) << best_A << "\n";
+    std::cout << "Final Chi-squared: " << std::scientific << final_chi2 << std::defaultfloat << "\n";
+
+    std::cout << "\nGenerating plot data...\n";
+    
+    std::ofstream plot_file("higgs_fit.dat");
+    if (!plot_file) {
+        std::cerr << "Error: Could not create higgs_fit.dat\n";
+        return;
+    }
+
+    plot_file << "# E[GeV] Signal[units] Error[units] Fit[units]\n";
+
+    for (size_t i = 0; i < energy.size(); ++i) {
+        double E = energy[i];
+        double sigma_obs = signal[i];
+        double err = error[i];
+        double sigma_model = best_A / ((E - best_m)*(E - best_m) + (best_gamma*best_gamma)/4.0);
+        plot_file << E << " " << sigma_obs << " " << err << " " << sigma_model << "\n";
+    }
+    
+    double min_e = energy.front() - 10;
+    double max_e = energy.back() + 10;
+    double step = 0.1;
+    
+    plot_file << "\n# Smooth Fit Curve\n";
+    for (double e = min_e; e <= max_e; e += step) {
+        double sigma_model = best_A / ((e - best_m)*(e - best_m) + (best_gamma*best_gamma)/4.0);
+        plot_file << e << " " << sigma_model << "\n";
+    }
+
+    plot_file.close();
+    std::cout << "Data saved to higgs_fit.dat\n";
+}
 
 
 void QuestionC();
@@ -373,7 +357,7 @@ int main() {
     std::cout << "\n#################################################################\n\n";
     
     std::cout << "######### Question B: #########\n\n";
-    // QuestionB();
+    QuestionB();
     std::cout << "\n#################################################################\n\n";
     
     std::cout << "######### Question C: #########\n\n";
