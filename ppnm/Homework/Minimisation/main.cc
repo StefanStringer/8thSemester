@@ -321,7 +321,7 @@ void QuestionA() {
     std::cout << "f(x,y) = (1-x)^2 + 100(y-x^2)^2\n";
     std::cout << "Expected minimum: (1.0, 1.0)\n\n";
 
-    vector start({-1.01, 1.01});
+    vector start({-1.0, 1.0});
     std::cout << "Start: (" << start[0] << ", " << start[1] << ")\n";
 
     vector min_rosen = newton_minimise(rosenbrock_scalar, start, 1e-6, 10000);

@@ -8,12 +8,12 @@ Testing on Rosenbrock function:
 f(x,y) = (1-x)^2 + 100(y-x^2)^2
 Expected minimum: (1.0, 1.0)
 
-Start: (-1.01, 1.01)
+Start: (-1, 1)
 Converged: No (Max Iterations or Stuck)
 Iterations: 10000
-Final Gradient Norm: 1.125382e+01
-Found minimum at: (-0.346499, 0.171711)
-Function value at minimum: 2.07983
+Final Gradient Norm: 1.915166e+00
+Found minimum at: (0.109981, 0.014152)
+Function value at minimum: 0.792556
 
 Testing on Himmelblau's function:
 f(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2
