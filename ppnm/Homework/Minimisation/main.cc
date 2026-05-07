@@ -36,19 +36,22 @@ matrix hessian(std::function<double(vector)> phi, vector x) {
     int n = x.size();
     matrix H(n, n);
     
+    // 1. Calculate the base gradient ONCE (Optimization)
+    vector g_base = gradient(phi, x); 
+    
     for (int j = 0; j < n; j++) {
-        double dxj = (1.0 + std::abs(x[j])) * std::pow(2.0, -10); // Changed from -13 to -10
+        // 2. Use step size ~ epsilon^(1/4) as suggested in assignment notes
+        double dxj = (1.0 + std::abs(x[j])) * std::pow(2.0, -13); 
         
         vector x_plus = x;
-        vector x_minus = x;
         x_plus[j] += dxj;
-        x_minus[j] -= dxj;
-        
+
+        // 3. Only calculate the perturbed gradient
         vector g_plus = gradient(phi, x_plus);
-        vector g_minus = gradient(phi, x_minus);
         
+        // 4. Compute the column of the Hessian
         for (int i = 0; i < n; i++) {
-            H(i, j) = (g_plus[i] - g_minus[i]) / (2.0 * dxj);
+            H(i, j) = (g_plus[i] - g_base[i]) / dxj;
         }
     }
     return H;
@@ -73,14 +76,14 @@ struct QRResults {
         for (int i = b.size() - 1; i >= 0; i--) {
             double sum = 0;
             for (int j = i + 1; j < b.size(); j++) sum += R(i, j) * x[j];
-            if (std::abs(R(i, i)) < 1e-12) throw std::runtime_error("Single matrix in Q R");
+            if (std::abs(R(i, i)) < 1e-12) throw std::runtime_error("Singular matrix in QR solve");
             x[i] = (y[i] - sum) / R(i, i);
         }
         return x;
     }
 };
 
-QRResults qr_decomposition(matrix A) { //from previous roots homework
+QRResults qr_decomposition(matrix A) {
     int m = A.size1();
     int n = A.size2();
     matrix Q(m, m);
@@ -175,17 +178,18 @@ vector newton_minimise(std::function<double(vector)> phi, vector x, double acc =
             ls_fails++;
         }
 
+        // Adaptive regularization
         if (ls_fails > 5) {
             reg *= 10.0;
             if (reg > 1.0) reg = 1.0;
         } else {
-            if (reg > 1e-6) reg /=2.0;
+            if (reg > 1e-6) reg /= 2.0;
         }
+        
         x = x + dx * lambda;
         iter++;
     }
 
-    // Print results in the requested format
     std::cout << "Converged: " << (converged ? "Yes" : "No (Max Iterations or Stuck)") << "\n";
     std::cout << "Iterations: " << iter << "\n";
     std::cout << "Final Gradient Norm: " << std::scientific << gradient(phi, x).norm() << std::defaultfloat << "\n";
@@ -201,8 +205,6 @@ double rosenbrock_scalar(vector x) {
     return std::pow(1.0 - xi, 2) + 100.0 * std::pow(yi - xi*xi, 2);
 }
 
-//now himmerlblaus function
-
 double himmelblau_scalar(vector x) {
     double xi = x[0];
     double yi = x[1];
@@ -211,8 +213,8 @@ double himmelblau_scalar(vector x) {
 
 
 void QuestionA() {
-    std::cout << "######### Question A: Newton minimisation #########\n\n";
-    //First test on Rosenbrock function
+    std::cout << "######### Question A: Newton minimisation (Forward Diff) #########\n\n";
+    
     std::cout << "Testing on Rosenbrock function:\n";
     std::cout << "f(x,y) = (1-x)^2 + 100(y-x^2)^2\n";
     std::cout << "Expected minimum: (1.0, 1.0)\n\n";
@@ -225,11 +227,11 @@ void QuestionA() {
     std::cout << "Found minimum at: (" << min_rosen[0] << ", " << min_rosen[1] << ")\n";
     std::cout << "Function value at minimum: " << rosenbrock_scalar(min_rosen) << "\n\n";
 
-    //second test with Himmelblaus function
     std::cout << "Testing on Himmelblau's function:\n";
     std::cout << "f(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2\n";
     std::cout << "Has 4 minima. Testing different starts...\n\n";
-    std::vector<std::pair< double, double>> himmel_starts = {
+    
+    std::vector<std::pair<double, double>> himmel_starts = {
         {3.0, 2.0},  
         {-2.8, 3.1}, 
         {-3.8, -3.3}, 
@@ -266,7 +268,6 @@ void QuestionB() {
 
     std::cout << "Loaded " << energy.size() << " data points.\n";
 
-    // Lambda captures 'energy', 'signal', 'error' by reference automatically
     auto chi2_func = [&](vector params) -> double {
         double m = params[0];
         double gamma = params[1];
@@ -359,20 +360,22 @@ vector gradient_central(std::function<double(vector)> phi, vector x) {
 matrix hessian_central(std::function<double(vector)> phi, vector x) {
     int n = x.size();
     matrix H(n, n);
+    // Central difference optimal step is ~ epsilon^(1/3) -> 2^-17
     double h_base = std::pow(2.0, -17.0);
+
+    //Calculate base gradient ONCE so it is better optimised
+    vector g_base = gradient_central(phi, x);
 
     for (int j = 0; j < n; j++) {
         double h = (1.0 + std::abs(x[j])) * h_base;
         vector x_plus = x;
-        vector x_minus = x;
         x_plus[j] += h;
-        x_minus[j] -= h;
 
+        //Only calculate perturbed gradient too
         vector g_plus = gradient_central(phi, x_plus);
-        vector g_minus = gradient_central(phi, x_minus);
 
         for (int i = 0; i < n; i++) {
-            H(i, j) = (g_plus[i] - g_minus[i]) / (2.0 * h);
+            H(i, j) = (g_plus[i] - g_base[i]) / h;
         }
     }
     return H;
@@ -419,7 +422,7 @@ vector newton_minimise_central(std::function<double(vector)> phi, vector x, doub
             reg *= 10.0;
             if (reg > 1.0) reg = 1.0;
         } else {
-            if (reg > 1e-6) reg /=2.0;
+            if (reg > 1e-6) reg /= 2.0;
         }
         x = x + dx * lambda;
         iter++;
@@ -437,14 +440,12 @@ void QuestionC() {
     
     std::cout << "Comparing Forward Difference (Part A) vs Central Difference (Part C)\n";
 
-    // Test Rosenbrock function first
     std::cout << "### Rosenbrock Function ###\n";
     vector start_rosen({-1.0, 1.0});
     
     std::cout << "Start: (" << start_rosen[0] << ", " << start_rosen[1] << ")\n\n";
     
     std::cout << "Forward Difference:\n";
-    // We reuse the old function which uses forward/forward
     vector res_forward = newton_minimise(rosenbrock_scalar, start_rosen, 1e-6);
     std::cout << "   Result: (" << res_forward[0] << ", " << res_forward[1] << ")\n";
     std::cout << "   Value: " << rosenbrock_scalar(res_forward) << "\n\n";
@@ -454,7 +455,6 @@ void QuestionC() {
     std::cout << "   Result: (" << res_central[0] << ", " << res_central[1] << ")\n";
     std::cout << "   Value: " << rosenbrock_scalar(res_central) << "\n\n";
 
-    // Test Himmelblau function after
     std::cout << "### Himmelblau Function ###\n";
     std::vector<std::pair<double, double>> starts = {
         {3.0, 2.0}, {-2.8, 3.1}, {-3.8, -3.3}, {3.6, -1.8}
@@ -472,11 +472,12 @@ void QuestionC() {
         vector res_c = newton_minimise_central(himmelblau_scalar, start_vec, 1e-8);
         std::cout << "(" << res_c[0] << ", " << res_c[1] << ") Val=" << himmelblau_scalar(res_c) << "\n\n";
     }
-
 }
 
+// -----------------------------------------------------------------------------
+// MAIN
+// -----------------------------------------------------------------------------
 int main() {
-
     std::ofstream outFile("Out.txt");
     if (!outFile.is_open()) {
         std::cerr << "Error: Could not create Out.txt\n";

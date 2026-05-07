@@ -3,7 +3,7 @@ ation #########
 
 ######### Question A: #########
 
-######### Question A: Newton minimisation #########
+######### Question A: Newton minimisation (Forward Diff) #########
 
 Testing on Rosenbrock function:
 f(x,y) = (1-x)^2 + 100(y-x^2)^2
@@ -12,9 +12,9 @@ Expected minimum: (1.0, 1.0)
 Start: (-1, 1)
 Converged: No (Max Iterations or Stuck)
 Iterations: 10000
-Final Gradient Norm: 1.915166e+00
-Found minimum at: (0.109981, 0.014152)
-Function value at minimum: 0.792556
+Final Gradient Norm: 2.053733e+00
+Found minimum at: (0.172462, 0.0334805)
+Function value at minimum: 0.686215
 
 Testing on Himmelblau's function:
 f(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2
@@ -30,23 +30,23 @@ Function value at minimum: 0
 Starting at: (-2.8, 3.1)
 Converged: Yes
 Iterations: 4
-Final Gradient Norm: 4.726215e-11
+Final Gradient Norm: 8.619590e-10
 Found minimum at: (-2.80512, 3.13131)
-Function value at minimum: 1.71673e-23
+Function value at minimum: 5.72168e-21
 
 Starting at: (-3.8, -3.3)
 Converged: Yes
 Iterations: 5
-Final Gradient Norm: 4.918487e-11
+Final Gradient Norm: 5.657632e-09
 Found minimum at: (-3.77931, -3.28319)
-Function value at minimum: 9.79146e-24
+Function value at minimum: 1.29808e-19
 
 Starting at: (3.6, -1.8)
 Converged: Yes
-Iterations: 4
-Final Gradient Norm: 7.297409e-09
+Iterations: 5
+Final Gradient Norm: 2.545575e-11
 Found minimum at: (3.58443, -1.84813)
-Function value at minimum: 2.52991e-19
+Function value at minimum: 3.06507e-24
 
 
 #################################################################
@@ -60,8 +60,8 @@ Loaded 30 data points.
 Initial guess: m=125, Gamma=1.0, A=5.0
 Running Newton Minimization...
 Converged: Yes
-Iterations: 31
-Final Gradient Norm: 3.623426e-07
+Iterations: 29
+Final Gradient Norm: 6.062347e-07
 
 --- Fit Results ---
 Mass (m): 125.97 GeV
@@ -85,15 +85,15 @@ Start: (-1, 1)
 Forward Difference:
 Converged: No (Max Iterations or Stuck)
 Iterations: 2000
-Final Gradient Norm: 3.3515e+01
-   Result: (-0.8553, 0.6551)
-   Value: 4.025
+Final Gradient Norm: 3.3556e+01
+   Result: (-0.855, 0.6545)
+   Value: 4.026
 
 Central Difference:
 Converged: No (Max Iterations or Stuck)
 Iterations: 2000
-Final Gradient Norm: 3.4266e+01
-   Result: (-0.8523, 0.6479)
+Final Gradient Norm: 3.4271e+01
+   Result: (-0.8522, 0.6478)
    Value: 4.047
 
 ### Himmelblau Function ###
@@ -110,32 +110,32 @@ Final Gradient Norm: 4.4939e-14
 Start: (-2.8, 3.1)
    Forward: Converged: Yes
 Iterations: 4
-Final Gradient Norm: 4.7262e-11
-(-2.805, 3.131) Val=1.717e-23
+Final Gradient Norm: 8.6196e-10
+(-2.805, 3.131) Val=5.722e-21
    Central: Converged: Yes
 Iterations: 4
-Final Gradient Norm: 4.5441e-11
-(-2.805, 3.131) Val=1.586e-23
+Final Gradient Norm: 1.6024e-11
+(-2.805, 3.131) Val=1.986e-24
 
 Start: (-3.8, -3.3)
    Forward: Converged: Yes
 Iterations: 5
-Final Gradient Norm: 4.9185e-11
-(-3.779, -3.283) Val=9.791e-24
+Final Gradient Norm: 5.6576e-09
+(-3.779, -3.283) Val=1.298e-19
    Central: Converged: Yes
 Iterations: 5
-Final Gradient Norm: 2.3275e-11
-(-3.779, -3.283) Val=2.183e-24
+Final Gradient Norm: 3.7837e-10
+(-3.779, -3.283) Val=5.816e-22
 
 Start: (3.6, -1.8)
    Forward: Converged: Yes
-Iterations: 4
-Final Gradient Norm: 7.2974e-09
-(3.584, -1.848) Val=2.53e-19
+Iterations: 5
+Final Gradient Norm: 2.5456e-11
+(3.584, -1.848) Val=3.065e-24
    Central: Converged: Yes
 Iterations: 4
-Final Gradient Norm: 7.0067e-09
-(3.584, -1.848) Val=2.332e-19
+Final Gradient Norm: 8.4302e-09
+(3.584, -1.848) Val=3.377e-19
 
 
 #################################################################
