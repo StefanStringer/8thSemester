@@ -76,6 +76,67 @@ Data saved to higgs_fit.dat
 
 ######### Question C: #########
 
+######### Question C: Central Difference Comparison #########
+
+Comparing Forward Difference (Part A) vs Central Difference (Part C)
+### Rosenbrock Function ###
+Start: (-1, 1)
+
+Forward Difference:
+Converged: No (Max Iterations or Stuck)
+Iterations: 2000
+Final Gradient Norm: 3.3515e+01
+   Result: (-0.8553, 0.6551)
+   Value: 4.025
+
+Central Difference:
+Converged: No (Max Iterations or Stuck)
+Iterations: 2000
+Final Gradient Norm: 3.4266e+01
+   Result: (-0.8523, 0.6479)
+   Value: 4.047
+
+### Himmelblau Function ###
+Start: (3, 2)
+   Forward: Converged: Yes
+Iterations: 0
+Final Gradient Norm: 4.4939e-14
+(3, 2) Val=0
+   Central: Converged: Yes
+Iterations: 0
+Final Gradient Norm: 4.4939e-14
+(3, 2) Val=0
+
+Start: (-2.8, 3.1)
+   Forward: Converged: Yes
+Iterations: 4
+Final Gradient Norm: 4.7262e-11
+(-2.805, 3.131) Val=1.717e-23
+   Central: Converged: Yes
+Iterations: 4
+Final Gradient Norm: 4.5441e-11
+(-2.805, 3.131) Val=1.586e-23
+
+Start: (-3.8, -3.3)
+   Forward: Converged: Yes
+Iterations: 5
+Final Gradient Norm: 4.9185e-11
+(-3.779, -3.283) Val=9.791e-24
+   Central: Converged: Yes
+Iterations: 5
+Final Gradient Norm: 2.3275e-11
+(-3.779, -3.283) Val=2.183e-24
+
+Start: (3.6, -1.8)
+   Forward: Converged: Yes
+Iterations: 4
+Final Gradient Norm: 7.2974e-09
+(3.584, -1.848) Val=2.53e-19
+   Central: Converged: Yes
+Iterations: 4
+Final Gradient Norm: 7.0067e-09
+(3.584, -1.848) Val=2.332e-19
+
 
 #################################################################
 

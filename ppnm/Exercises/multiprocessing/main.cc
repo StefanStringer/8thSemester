@@ -3,48 +3,77 @@
 #include <thread>
 #include <string>
 #include <vector>
+#include <cstdlib>
+#include <stdexcept>
+#include <chrono>
 
 struct datum {
-    int start, end;
+    int start;
+    int end;
     double sum;
 };
 
 void harm(datum& p) {
-    int start = p.start;
-    int end = p.end;
-    double sum = 0;
-    for (int i = start; i < end; i++) {
-        sum += 1.0 / i;
+    double sum = 0.0;
+    for (int i = p.start; i < p.end; ++i) {
+        sum += 1.0 / static_cast<double>(i);
     }
     p.sum = sum;
 }
 
 int main(int argc, char** argv) {
-    int nterms = static_cast<int>(1e9); // default: 1e9 terms
-    int nthreads = 1;                   // default: 1 thread
+    long long nterms = static_cast<long long>(1e9); // Use long long for large numbers
+    int nthreads = 1;
 
     // Parse command line arguments
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "-terms" && i + 1 < argc) {
-            nterms = static_cast<int>(std::stoll(argv[++i]));
-        }
-        if (arg == "-threads" && i + 1 < argc) {
-            nthreads = std::stoi(argv[++i]);
+            try {
+                nterms = std::stoll(argv[++i]);
+            } catch (...) {
+                std::cerr << "Invalid number for -terms\n";
+                return EXIT_FAILURE;
+            }
+        } else if (arg == "-threads" && i + 1 < argc) {
+            try {
+                nthreads = std::stoi(argv[++i]);
+            } catch (...) {
+                std::cerr << "Invalid number for -threads\n";
+                return EXIT_FAILURE;
+            }
         }
     }
 
-    std::cout << "terms: " << nterms << "\n";
-    std::cout << "threads: " << nthreads << "\n";
+    if (nthreads <= 0) {
+        std::cerr << "Number of threads must be > 0\n";
+        return EXIT_FAILURE;
+    }
+    if (nterms <= 0) {
+        std::cerr << "Number of terms must be > 0\n";
+        return EXIT_FAILURE;
+    }
 
-    // Prepare data objects for each thread
     std::vector<datum> data(nthreads);
+    
+
+    long long chunk = nterms / nthreads;
+    long long remainder = nterms % nthreads;
+    
+    int current_start = 1;
     for (int i = 0; i < nthreads; ++i) {
-        data[i].start = 1 + (nterms / nthreads) * i;
-        data[i].end   = 1 + (nterms / nthreads) * (i + 1);
+        // Distribute remainder to the first 'remainder' threads
+        long long current_chunk = chunk + (i < remainder ? 1 : 0);
+        
+        data[i].start = current_start;
+        data[i].end = current_start + current_chunk; // Exclusive end
+        data[i].sum = 0.0;
+        
+        current_start = data[i].end;
     }
-    // Fix last thread's endpoint
-    data[nthreads - 1].end = nterms + 1;
+
+    // Measure time
+    auto start_time = std::chrono::high_resolution_clock::now();
 
     // Launch threads
     std::vector<std::thread> threads;
@@ -54,17 +83,22 @@ int main(int argc, char** argv) {
     }
 
     // Join threads
-    for (std::thread &t : threads) {
+    for (auto& t : threads) {
         t.join();
     }
 
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end_time - start_time;
+
     // Sum up results
-    double total = 0;
-    for (datum &d : data) {
+    double total = 0.0;
+    for (const auto& d : data) {
         total += d.sum;
     }
 
-    std::cout << "total sum = " << total << std::endl;
+    // Output results
+    // Format: threads, time_seconds, user_time (simulated by wall time here)
+    std::cout << nthreads << " " << elapsed.count() << " " << total << "\n";
 
-    return 0;
+    return EXIT_SUCCESS;
 }

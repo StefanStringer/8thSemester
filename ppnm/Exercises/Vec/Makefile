@@ -1,27 +1,22 @@
 CXX = g++ -std=c++23
 CXXFLAGS += -Wall -Wextra -Werror
-LDLIBS += -lstdc++ -lm 
-
-run : Out.txt
-	cat Out.txt
+LDLIBS += -lstdc++ -lm
 
 Out.txt: main
 	./$< > $@
 
-main: main.o vec.o
+# Only main.o is needed now even though vec.cpp is still there sod it
+main: main.o
 
 main.o : main.cpp vec.h
 
-vec.o : vec.cpp vec.h
-
 .PHONY: clean
 clean:
-	$(RM) -f main main.o vec.o Out.txt
+	$(RM) -f main main.o Out.txt
 
 test:
 	@echo $(CXX)
 	@echo $(CXXFLAGS)
-	@echo $(RM)
 
 # # ------------------------------------------------------------
 # # Makefile for the vec demo

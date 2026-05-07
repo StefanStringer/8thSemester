@@ -1,75 +1,46 @@
-// ------------------------------------------------------------
-// main.cpp
-// ------------------------------------------------------------
 #include "vec.h"
 #include <iostream>
+#include <complex>
+#include <iomanip>
 
 int main() {
-    //LEcture stuff
-    // ----- Constructors -------------------------------------------------
-    vec a{1.0, 2.0, 3.0};          // parameterized
-    vec b;                         // default (0,0,0)
-    vec c = a;                     // copy construction
-    vec d = std::move(b);          // move construction (b becomes unspecified)
+    std::cout << std::setprecision(6);
 
-    // ----- Assignment ---------------------------------------------------
-    b = a;                         // copy assignment
-    d = std::move(c);              // move assignment
+    // 1. Double Precision (Standard)
+    std::cout << "--- Double Precision ---\n";
+    vec<double> v1(1.0, 2.0, 3.0);
+    vec<double> v2(4.0, 5.0, 6.0);
+    std::cout << "v1 = " << v1 << "\n";
+    std::cout << "v2 = " << v2 << "\n";
+    std::cout << "v1 + v2 = " << v1 + v2 << "\n";
+    std::cout << "v1 . v2 = " << v1.dot(v2) << "\n";
+    std::cout << "v1 x v2 = " << v1.cross(v2) << "\n";
+    std::cout << "|v1| = " << v1.norm() << "\n";
 
-    // ----- Arithmetic ---------------------------------------------------
-    vec e = a + b;                 // binary +
-    vec f = e - a;                 // binary -
-    vec g = f * 2.5;               // scalar multiplication (right side)
-    vec h = 0.5 * g;               // scalar multiplication (left side)
-    vec i = h / 2.0;               // division by scalar
-    i += a;                        // compound +=
-    i -= b;                        // compound -=
-    i *= 3.0;                      // compound *=
-    i /= 3.0;                      // compound /=
+    // 2. Float Precision
+    std::cout << "\n--- Float Precision ---\n";
+    vec<float> vf1(1.0f, 2.0f, 3.0f);
+    vec<float> vf2(4.0f, 5.0f, 6.0f);
+    std::cout << "vf1 = " << vf1 << "\n";
+    std::cout << "vf1.norm() = " << vf1.norm() << "\n";
 
-    // ----- Unary minus --------------------------------------------------
-    vec j = -i;                    // unary -
-
-    // ----- Stream output ------------------------------------------------
-    std::cout << "Vector j (stream output): " << j << '\n';
-
-    // ----- Debug print --------------------------------------------------
-    j.print("j");                  // prints with optional prefix
-
-    // ----- Approximate equality -----------------------------------------
-    vec k{1.000001, 2.000001, 3.000001};
-    bool same = approx(j, k, 1e-5, 1e-5);
-    std::cout << "j and k are approximately equal? "
-              << (same ? "yes" : "no") << '\n';
-
-    // ----- Show that everything works together -------------------------
-    std::cout << "\n--- Summary of all vectors ---\n";
-    std::cout << "a = " << a << "\n"
-              << "b = " << b << "\n"
-              << "d = " << d << "\n"
-              << "e = " << e << "\n"
-              << "f = " << f << "\n"
-              << "g = " << g << "\n"
-              << "h = " << h << "\n"
-              << "i = " << i << "\n"
-              << "j = " << j << "\n";
-
-    //Exercises here
-    vec v = vec(1.0, 2.0, 3.0);
-    vec w = vec(4.0, 5.0, 6.0);
-
-    std::cout << "\n Display Vectors v and w: \n";
-    std::cout << "v = " << v << "\n";
-    std::cout << "w = " << w << "\n";
+    // 3. Complex Numbers (Extra)
+    std::cout << "\n--- Complex Numbers ---\n";
+    using C = std::complex<double>;
+    vec<C> vc1(C(1.0, 2.0), C(3.0, 4.0), C(5.0, 6.0));
+    vec<C> vc2(C(0.0, 1.0), C(1.0, 0.0), C(1.0, 1.0));
     
-    std::cout << "Vector addition (v + w): " << v + w << "\n";
-    std::cout << "Vector subtraction (v - w): " << v - w << "\n";
-    std::cout << "Scalar multiplication (v * 2.0): " << v * 2.0 << "\n";
-    std::cout << "Scalar multiplication (2.0 * v): " << 2.0 * v << "\n";
-    std::cout << "Scalar division (v / 2.0): " << v / 2.0 << "\n";
-    std::cout << "Norm of v: " << v.norm() << "\n"; 
-    std::cout << "Dot product of v and w: " << v.dot(w) << "\n";
-    std::cout << "Cross product of v and w: " << v.cross(w) << "\n";
-    
+    std::cout << "vc1 = " << vc1 << "\n";
+    std::cout << "vc2 = " << vc2 << "\n";
+    std::cout << "vc1 + vc2 = " << vc1 + vc2 << "\n";
+    std::cout << "vc1 . vc2 = " << vc1.dot(vc2) << "\n";
+    std::cout << "|vc1| = " << vc1.norm() << "\n";
+
+    // 4. Approximation Test
+    std::cout << "\n--- Approximation Test ---\n";
+    vec<double> va(1.0000001, 2.0000001, 3.0000001);
+    vec<double> vb(1.0, 2.0, 3.0);
+    std::cout << "va approx vb? " << (approx(va, vb) ? "Yes" : "No") << "\n";
+
     return 0;
 }

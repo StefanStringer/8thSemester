@@ -1,63 +1,151 @@
 #pragma once
 #include <iostream>
-#include <string>
-#include<cmath>
+#include <cmath>
+#include <complex>
+#include <type_traits>
+#include <algorithm>
 
-struct vec {
-    double x, y, z;
+// Trait to check if T is a specialization of std::complex
+template<typename T>
+struct is_complex : std::false_type {};
 
-    // constructors
-    vec(double x, double y, double z) : x(x), y(y), z(z) {}  // parameterized
-    vec() : vec(0, 0, 0) {}                                    // default
-    vec(const vec&) = default;                                 // copy
-    vec(vec&&) = default;                                      // move
-    ~vec() = default;                                          // destructor
+template<typename U>
+struct is_complex<std::complex<U>> : std::true_type {};
 
-    // assignment
-    vec& operator=(const vec&) = default;                     // copy assignment
-    vec& operator=(vec&&) = default;                          // move assignment
+template<typename T>
+inline constexpr bool is_complex_v = is_complex<T>::value;
 
-    // arithmetic
-    vec& operator+=(const vec&);
-    vec& operator-=(const vec&);
-    vec& operator*=(double);
-    vec& operator/=(double);
+// Helper to check if T is an arithmetic type or complex
+template<typename T>
+struct is_arithmetic_or_complex : std::integral_constant<bool, 
+    std::is_arithmetic_v<T> || is_complex_v<T>
+> {};
 
-    // utility
-    void set(double a, double b, double c) { x = a; y = b; z = c; }
-    void print(const std::string& s = "") const;              // for debugging
+template<typename T>
+inline constexpr bool is_arithmetic_or_complex_v = is_arithmetic_or_complex<T>::value;
 
-    // stream output
-    friend std::ostream& operator<<(std::ostream&, const vec&);
+template<typename T>
+class vec {
+public:
+    T x, y, z;
 
-    // dot-product
-    double dot(const vec& b) {
-        double sum = x * b.x + y * b.y + z * b.z;
-        return sum;
+    // --- Constructors ---
+    vec(T x_, T y_, T z_) : x(x_), y(y_), z(z_) {}
+    vec() : x{}, y{}, z{} {} // Default initialization
+    
+    // Copy/Move constructors and assignment are implicitly generated
+    vec(const vec&) = default;
+    vec(vec&&) = default;
+    vec& operator=(const vec&) = default;
+    vec& operator=(vec&&) = default;
+
+    // --- Member Operators (Compound) ---
+    vec& operator+=(const vec& rhs) {
+        x += rhs.x; y += rhs.y; z += rhs.z;
+        return *this;
+    }
+    vec& operator-=(const vec& rhs) {
+        x -= rhs.x; y -= rhs.y; z -= rhs.z;
+        return *this;
+    }
+    vec& operator*=(const T& s) {
+        x *= s; y *= s; z *= s;
+        return *this;
+    }
+    vec& operator/=(const T& s) {
+        x /= s; y /= s; z /= s;
+        return *this;
     }
 
-    // cross-product
-    vec cross(const vec& b) {
-        double new_x = y * b.z - z * b.y;
-        double new_y = z * b.x - x * b.z;
-        double new_z = x * b.y - y * b.x;
-        return vec(new_x, new_y, new_z);
+    // --- Utility ---
+    void print(const std::string& s = "") const {
+        std::cout << s << "(" << x << ", " << y << ", " << z << ")" << std::endl;
     }
 
-    // norm
-    double norm() {
-        double length = std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
-        return length;
+    // --- Math Operations ---
+    // Dot product: returns T (scalar)
+    T dot(const vec& b) const {
+        return x * b.x + y * b.y + z * b.z;
     }
+
+    // Cross product: returns vec<T>
+    vec cross(const vec& b) const {
+        return vec(
+            y * b.z - z * b.y,
+            z * b.x - x * b.z,
+            x * b.y - y * b.x
+        );
+    }
+
+    // Norm: returns T (magnitude)
+    T norm() const {
+        if constexpr (is_complex_v<T>) {
+            using V = typename T::value_type;
+            V sum_sq = std::norm(x) + std::norm(y) + std::norm(z);
+            return static_cast<T>(std::sqrt(sum_sq)); 
+        } else {
+            return std::sqrt(x*x + y*y + z*z);
+        }
+    }
+
+    // --- Friend Stream Output (Must be template) ---
+    template<typename U>
+    friend std::ostream& operator<<(std::ostream& os, const vec<U>& v);
 };
 
-// non-member operators
-vec operator-(const vec&);
-vec operator-(const vec&, const vec&);
-vec operator+(const vec&, const vec&);
-vec operator*(const vec&, double);
-vec operator*(double, const vec&);
-vec operator/(const vec&, double);
+// --- Non-Member Operators (Templates) ---
 
-// approximate equality
-bool approx(const vec&, const vec&, double acc = 1e-6, double eps = 1e-6);
+// Modern form: takes first arg by value
+template<typename T>
+vec<T> operator+(vec<T> a, const vec<T>& b) {
+    a += b;
+    return a;
+}
+
+template<typename T>
+vec<T> operator-(const vec<T>& a, const vec<T>& b) {
+    return vec<T>(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+template<typename T>
+vec<T> operator-(const vec<T>& v) {
+    return vec<T>(-v.x, -v.y, -v.z);
+}
+
+template<typename T>
+vec<T> operator*(const vec<T>& v, const T& s) {
+    return vec<T>(v.x * s, v.y * s, v.z * s);
+}
+
+template<typename T>
+vec<T> operator*(const T& s, const vec<T>& v) {
+    return v * s;
+}
+
+template<typename T>
+vec<T> operator/(const vec<T>& v, const T& s) {
+    return vec<T>(v.x / s, v.y / s, v.z / s);
+}
+
+// --- Stream Output Implementation ---
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const vec<T>& v) {
+    os << "{ " << v.x << ", " << v.y << ", " << v.z << " }";
+    return os;
+}
+
+// --- Approximate Equality ---
+template<typename T>
+bool approx(const vec<T>& a, const vec<T>& b, T acc = T(1e-6), T eps = T(1e-6)) {
+    auto close = [&](const T& ai, const T& bi) {
+        T diff = std::abs(ai - bi);
+        if (diff <= acc) return true;
+        
+        T max_val = std::max(std::abs(ai), std::abs(bi));
+        if (max_val == T{}) return true;
+        
+        return (diff / max_val) <= eps;
+    };
+
+    return close(a.x, b.x) && close(a.y, b.y) && close(a.z, b.z);
+}

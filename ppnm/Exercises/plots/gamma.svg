@@ -327,12 +327,12 @@
 	<use xlink:href='#gpPt6' transform='translate(915.59,99.01) scale(12.00)' color='rgb(255,   0,   0)'/>
 </g>
 	</g>
-	<g id="gnuplot_plot_2" ><title>Stirling smooth</title>
+	<g id="gnuplot_plot_2" ><title>Stirling Smooth</title>
 <g fill="none" color="white" stroke="rgb(255,   0,   0)" stroke-width="2.00" stroke-linecap="butt" stroke-linejoin="miter">
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.00" stroke-linecap="butt" stroke-linejoin="miter">
 	<g transform="translate(875.99,128.21)" stroke="none" fill="black" font-family="Arial" font-size="16.00"  text-anchor="end">
-		<text><tspan font-family="Arial" >Stirling smooth</tspan></text>
+		<text><tspan font-family="Arial" >Stirling Smooth</tspan></text>
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.00" stroke-linecap="butt" stroke-linejoin="miter">

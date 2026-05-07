@@ -22,13 +22,13 @@ int main()
     std::cout << "21/5   = " << 21.0 / 5.0 << "Precise value: 4.2" <<'\n';
     std::cout << "2 ^(1/5) = " << std::pow(2.0, 1.0/5.0) << " Precise value: 1.148698354997035" << "\n";
     std::cout << "e^π    = " << std::pow(E, π) << " Precise value: 23.140692632779267" << "\n";
-    std::cout << "π·e    = " << std::pow(π, E) << " Precise value: 22.45915771836104" << "\n";
+    std::cout << "π^e     = " << std::pow(π, E) << " Precise value: 22.45915771836104" << "\n";
 
     std::cout << "\nPart Two\n";
     std::cout << "Gamma(x)  (Stirling approx)   |   lnGamma(x)\n";
     std::cout << "-------------------------------------------------\n";
 
-    for (int i = 1; i <= 10 + 1; i++) {
+    for (int i = 1; i <= 10; i++) {
         double g  = sfuns::fgamma(static_cast<double>(i));
         double lg = sfuns::lngamma(static_cast<double>(i));
         std::cout << "Γ(" << i << ") = " << std::setw(20) << g
