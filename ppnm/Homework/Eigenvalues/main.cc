@@ -119,8 +119,6 @@ static pair<Eigenvalues::vector,Eigenvalues::matrix> diagonalize(Eigenvalues::ma
 
     }while(changed);
 
-    // cout<<"Jacobi rotation sweeps used in calc: "<<sweeps<<"\n";
-
     Eigenvalues::vector eigenvalues(n);
 
     for(int i=0;i<n;i++)
@@ -202,7 +200,6 @@ int main(int argc, char** argv) {
         }
         
         if(arg == "-wf" && i+1 < argc){
-            // Handled later if needed
             i++; 
         }
         

@@ -10,7 +10,7 @@ a      = 142.404
 lambda = 0.170624
 Half-life = 4.06242 days
 
-Modern value for Ra-224 half-life ≈ 3.66 days
+Theoretical value is 3.66 days
 
 ===========================================
 Question B: Fit with Uncertainties
