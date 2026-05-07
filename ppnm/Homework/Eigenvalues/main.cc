@@ -7,6 +7,7 @@
 #include <thread>
 #include <chrono>
 #include <fstream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -118,7 +119,7 @@ static pair<Eigenvalues::vector,Eigenvalues::matrix> diagonalize(Eigenvalues::ma
 
     }while(changed);
 
-    cout<<"Jacobi rotation sweeps used in calc: "<<sweeps<<"\n";
+    // cout<<"Jacobi rotation sweeps used in calc: "<<sweeps<<"\n";
 
     Eigenvalues::vector eigenvalues(n);
 
@@ -163,7 +164,7 @@ Eigenvalues::matrix hydrogen_matrix(double rmax,double dr){
 }
 
 //////////////////////////////////////////////////////////////
-// TIMING FUNCTION MY GOD THIS TOOK AGES TO FIGURE OUT
+// TIMING FUNCTION
 //////////////////////////////////////////////////////////////
 
 double time_jacobi(int n){
@@ -185,9 +186,61 @@ double time_jacobi(int n){
 // MAIN
 //////////////////////////////////////////////////////////////
 
-using namespace std;
-
 int main(int argc, char** argv) {
+
+    bool e0_only = false;
+    string diag_file = "";
+    int diag_size = -1; 
+
+    // Parse arguments
+    for(int i=1; i<argc; i++){
+        string arg = argv[i];
+
+        if(arg == "-e0only") {
+            e0_only = true;
+            continue;
+        }
+        
+        if(arg == "-wf" && i+1 < argc){
+            // Handled later if needed
+            i++; 
+        }
+        
+        if(arg == "-diagf" && i+1 < argc){
+            diag_file = argv[++i];
+            if(i+1 < argc) {
+                diag_size = atoi(argv[++i]);
+            }
+            continue;
+        }
+
+        if(arg == "-rmax" && i+1 < argc) {
+            double dummy = atof(argv[++i]); (void)dummy;
+        }
+        if(arg == "-dr" && i+1 < argc) {
+            double dummy = atof(argv[++i]); (void)dummy;
+        }
+    }
+
+    // --- SPECIAL MODE: TIMING FOR SPECIFIC SIZE ---
+    if (diag_size > 0) {
+        double t = time_jacobi(diag_size);
+        if (!diag_file.empty()) {
+            ofstream out(diag_file);
+            if(out.is_open()){
+                out << diag_size << " " << t << "\n";
+                out.close();
+            } else {
+                cerr << "Error: Could not open file " << diag_file << endl;
+                return 1;
+            }
+        } else {
+            cout << diag_size << " " << t << "\n";
+        }
+        return 0;
+    }
+
+    // --- NORMAL MODE ---
 
     cout << "\n=============================\n";
     cout << "PART 1: JACOBI TEST\n";
@@ -196,30 +249,34 @@ int main(int argc, char** argv) {
     int n = 4;
     auto A = make_random_symmetric(n);
 
-    cout << "Random symmetric matrix A:\n";
-    A.print("");
+    if (!e0_only) {
+        cout << "Random symmetric matrix A:\n";
+        A.print("");
 
-    auto [w, V] = JacobiSolver::diagonalize(A);
+        auto [w, V] = JacobiSolver::diagonalize(A);
 
-    cout << "Eigenvalues:\n";
-    w.print("");
+        cout << "Eigenvalues:\n";
+        w.print("");
 
-    cout << "Eigenvectors V:\n";
-    V.print("");
+        cout << "Eigenvectors V:\n";
+        V.print("");
 
-    Eigenvalues::matrix D(n,n);
-    for(int i=0; i<n; i++)
-        D(i,i) = w[i];
-    cout << "Diagonal matrix D:\n";
-    D.print("");
+        Eigenvalues::matrix D(n,n);
+        for(int i=0; i<n; i++)
+            D(i,i) = w[i];
+        cout << "Diagonal matrix D:\n";
+        D.print("");
 
-    auto A_reconstructed = V*D*V.transpose();
-    cout << "Check V*D*V^T:\n";
-    A_reconstructed.print("");
+        auto A_reconstructed = V*D*V.transpose();
+        cout << "Check V*D*V^T:\n";
+        A_reconstructed.print("");
 
-    auto VTV = V.transpose()*V;
-    cout << "Check V^T * V:\n";
-    VTV.print("");
+        auto VTV = V.transpose()*V;
+        cout << "Check V^T * V:\n";
+        VTV.print("");
+    } else {
+        auto [w, V] = JacobiSolver::diagonalize(A);
+    }
 
     // -------------------------------
     // PART 2: HYDROGEN ATOM
@@ -232,19 +289,18 @@ int main(int argc, char** argv) {
     double rmax = 10.0;
     double dr   = 0.3;
     string wf_file = "";
-    string diag_file = "";
 
-    // parse command-line args
-    for(int i=1; i<argc; i++){
-        string arg = argv[i];
-        if(arg == "-wf" && i+1 < argc)
-            wf_file = argv[++i];
-        if(arg == "-diagf" && i+1 < argc)
-            diag_file = argv[++i];
-        if(arg == "-rmax" && i+1 < argc)
-            rmax = atof(argv[++i]);
-        if(arg == "-dr" && i+1 < argc)
-            dr   = atof(argv[++i]);
+    // Re-parse for Hydrogen specific args
+    if (diag_size <= 0) {
+        for(int i=1; i<argc; i++){
+            string arg = argv[i];
+            if(arg == "-wf" && i+1 < argc)
+                wf_file = argv[++i];
+            if(arg == "-rmax" && i+1 < argc)
+                rmax = atof(argv[++i]);
+            if(arg == "-dr" && i+1 < argc)
+                dr   = atof(argv[++i]);
+        }
     }
 
     int npoints = int(rmax/dr) - 1;
@@ -252,7 +308,10 @@ int main(int argc, char** argv) {
     for(int i=0; i<npoints; i++) r[i] = dr*(i+1);
 
     auto H = hydrogen_matrix(rmax, dr);
-    cout << "Hamiltonian built.\n";
+    
+    if (!e0_only) {
+        cout << "Hamiltonian built.\n";
+    }
 
     auto [E, Vec] = JacobiSolver::diagonalize(H);
 
@@ -261,15 +320,17 @@ int main(int argc, char** argv) {
     for(int i=0; i<nprint; i++)
         cout << "E[" << i << "] = " << E[i] << "\n";
 
-    cout << "Exact ground state = -0.5\n";
+    if (!e0_only) {
+        cout << "Exact ground state = -0.5\n";
+    }
 
     // save wavefunctions if requested
     if(wf_file != ""){
         ofstream wf(wf_file);
         for(int i=0; i<npoints; i++){
             wf << r[i];
-            for(int k=0; k<3; k++){ // save first 3 wavefunctions
-                wf << " " << Vec(i,k)/sqrt(dr); // normalized
+            for(int k=0; k<3; k++){ 
+                wf << " " << Vec(i,k)/sqrt(dr); 
             }
             wf << "\n";
         }
@@ -277,34 +338,27 @@ int main(int argc, char** argv) {
     }
 
     // -------------------------------
-    // PART 3: SCALING TEST
+    // PART 3: SCALING TEST (Interactive)
     // -------------------------------
 
-    cout << "\n=============================\n";
-    cout << "PART 3: SCALING TEST\n";
-    cout << "=============================\n\n";
+    if (!e0_only && diag_size <= 0) {
+        cout << "\n=============================\n";
+        cout << "PART 3: SCALING TEST\n";
+        cout << "=============================\n\n";
 
-    cout << "N    Time(s)\n";
+        cout << "N    Time(s)\n";
 
-    vector<int> sizes = {20,40,60,80,100,120,140,160,180,200};
-    vector<double> times(sizes.size());
+        vector<int> sizes = {20,40,60,80,100,120,140,160,180,200};
+        vector<double> times(sizes.size());
 
-    for(size_t i=0;i<sizes.size();i++){
-        times[i] = time_jacobi(sizes[i]);
-        cout << sizes[i] << "   " << times[i] << "\n";
+        for(size_t i=0;i<sizes.size();i++){
+            times[i] = time_jacobi(sizes[i]);
+            cout << sizes[i] << "   " << times[i] << "\n";
+        }
+
+        cout << "\nExpected scaling ~ N^3\n";
+        cout << "\nProgram finished.\n";
     }
-
-    // save diag times if requested
-    if(diag_file != ""){
-        ofstream df(diag_file);
-        for(size_t i=0;i<sizes.size();i++)
-            df << sizes[i] << " " << times[i] << "\n";
-        df.close();
-    }
-
-    cout << "\nExpected scaling ~ N^3\n";
-    cout << "\nProgram finished.\n";
-    cout << "\n Images printed out can be found in the current folder.\n";
 
     return 0;
 }
