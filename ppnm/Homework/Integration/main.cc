@@ -17,7 +17,7 @@ std::pair<double,double> integrate(std::function<double(double)> f, double a, do
                                    double acc=1e-4, double eps=1e-4,
                                    double f2=std::nan("1"), double f3=std::nan("1"),
                                    int depth=0) {
-    if(depth > 1000) return {0, 1e10}; // prevent infinite recursion
+    if(depth > 1000) return {0, 1e10}; 
 
     double h = b - a;
     if(std::isnan(f2)) { f2 = f(a + 2*h/6); f3 = f(a + 4*h/6); }
@@ -40,21 +40,23 @@ std::pair<double,double> integrate(std::function<double(double)> f, double a, do
     }   
 }
 
-// Clenshaw–Curtis transformation + infinite interval support
+// Clenshaw–Curtis transformation and infinite interval support
 auto integrate_cc(std::function<double(double)> f, double a, double b,
                                       double acc=1e-4, double eps=1e-4) {
+    const double INF = std::numeric_limits<double>::infinity();
+
     // Infinite limits
-    if (a == -INFINITY && b == INFINITY) {
+    if (a == -INF && b == INF) {
         auto integrand = [&](double t) {
             return f(t / (1 - t*t)) * (1 + t*t) / ((1-t*t) * (1-t*t));
         };
         return integrate(integrand, -1.0, 1.0, acc, eps);
     }
-    if(a == -INFINITY && std::isfinite(b)) {
+    if(a == -INF && std::isfinite(b)) {
         auto integrand = [&](double t){ return f(b - (1-t)/t) / (t*t); };
         return integrate(integrand, 0.0, 1.0, acc, eps);
     }
-    if(std::isfinite(a) && b == INFINITY) {
+    if(std::isfinite(a) && b == INF) {
         auto integrand = [&](double t){ return f(a + (1-t)/t) / (t*t); };
         return integrate(integrand, 0.0, 1.0, acc, eps);
     }
@@ -80,19 +82,18 @@ double my_erf(double z, double acc=1e-6, double eps=1e-6) {
     }
 }
 
-// Simple linspace
 std::vector<double> linspace(double start, double stop, int num) {
     std::vector<double> v(num);
+    if (num==0) return v;
     double step = (stop-start)/(num-1);
     for(int i=0;i<num;i++) v[i] = start + i*step;
     return v;
 }
 
-int main() {
-    std::cout << std::fixed << std::setprecision(8);
-
+// QUESTION A: Basic Integrals & ERF
+void QuestionA() {
     std::cout << "### PART A: Basic Integrals & Error Function ###\n";
-    // Functions that we want to do tests for 
+    
     auto fA = [](double x){ return std::sqrt(x); };
     auto fB = [](double x){ return 1/std::sqrt(x); };
     auto fC = [](double x){ return std::sqrt(1-x*x); };
@@ -126,7 +127,7 @@ int main() {
     std::vector<double> zs = linspace(-5, 5, 500);
     for (int i = 0; i < (int)zs.size(); i++) {
         double z = zs[i];
-        double vals = erf(z);
+        double vals = my_erf(z);
         erf_data << z << " " << vals << "\n";
     }
     erf_data.close();
@@ -135,36 +136,64 @@ int main() {
     std::ofstream arf_acc_data("erf_acc.dat");
     double acc = 0.1;
     double exact = 0.84270079294971486934;
-    std::vector<double> accs(13);
     for(int i=0;i<7;i++){
         double val = my_erf(1.0,0.0,acc);
         arf_acc_data << acc << " " << val << " " << std::abs(val-exact) << "\n";
         acc /= 10;
     }
     arf_acc_data.close();
+}
 
+// QUESTION B: Clenshaw-Curtis & Infinite Limits
+void QuestionB() {
     std::cout << "\n ### PART B: Clenshaw-Curtis & Infinite Limits ###\n";
 
-    eval_count=0;
-    auto [CC_A,eCC_A] = integrate_cc(fA,a,b);
-    std::cout << "sqrt(x) | CC = " << CC_A << " | Plain = " << I_A << "\n";
+    auto fA = [](double x){ return std::sqrt(x); };
+    auto fB = [](double x){ return 1/std::sqrt(x); };
+    auto fcount = [](double x){ return x*x; };
+    auto g = [](double x){ return std::exp(-x*x); };
 
     eval_count=0;
-    auto [CC_B,eCC_B] = integrate_cc(fB,a,b);
-    std::cout << "1/sqrt(x) | CC = " << CC_B << " | Plain = " << I_B << "\n";
+    auto [CC_A,eCC_A] = integrate_cc(fA,0,1);
+    std::cout << "sqrt(x) | CC = " << CC_A << " | Plain = " << integrate(fA,0,1).first << "\n";
 
     eval_count=0;
-    int ncalls=0;
-    auto fcount = [&ncalls](double x){ ncalls++; return x*x; };
+    auto [CC_B,eCC_B] = integrate_cc(fB,0,1);
+    std::cout << "1/sqrt(x) | CC = " << CC_B << " | Plain = " << integrate_cc(fB,0.001,1).first << "\n";
+
+    eval_count=0;
     auto [I_f, e_f] = integrate_cc(fcount,0,1);
-    std::cout << "z^2 integral 0..1 = " << I_f << " | Function calls = " << ncalls << " | Scipy ~21\n";
+    std::cout << "z^2 integral 0..1 = " << I_f << " | Function calls = " << eval_count << " | Scipy ~21\n";
 
-    ncalls=0;
-    auto g = [&ncalls](double x){ ncalls++; return std::exp(-x*x); };
+    eval_count=0;
     auto [I_g, e_g] = integrate_cc(g,-INFINITY,INFINITY);
-    std::cout << "exp(-x^2) -inf..inf = " << I_g << " | Function calls = " << ncalls << " | Scipy ~277\n";
+    std::cout << "exp(-x^2) -inf..inf = " << I_g << " | Function calls = " << eval_count << " | Scipy ~277\n";
+}
 
-    std::cout << "\n=== PART C: Difficult Integrals ===\n";
+// QUESTION C: Error Estimate Quality Check
+void QuestionC() {
+    std::cout << "\n=== PART C: Difficult Integrals & Error Estimate ===\n";
+
+    // Test quality of error estimate on 1/sqrt(x)
+    double exact_val = 2.0;
+    auto f_test = [](double x){ return 1/std::sqrt(x); };
+    
+    eval_count = 0;
+    auto [res, est_err] = integrate_cc(f_test, 0, 1);
+    double actual_err = std::abs(res - exact_val);
+
+    std::cout << "Integral: 1/sqrt(x) from 0 to 1\n";
+    std::cout << "Exact: " << exact_val << "\n";
+    std::cout << "Result: " << res << "\n";
+    std::cout << "Estimated Error: " << est_err << "\n";
+    std::cout << "Actual Error: " << actual_err << "\n";
+
+    if(actual_err <= est_err) {
+        std::cout << "Result: Error estimate is valid (Actual <= Estimated)\n";
+    } else {
+        std::cout << "Result: Warning (Actual > Estimated by factor " << actual_err/est_err << ")\n";
+    }
+
     auto h1 = [](double x){ return std::sin(x)/std::exp(-x*x); };
     auto [I_h1,e_h1] = integrate_cc(h1,0,M_PI);
     std::cout << "int_0^pi sin(x)/exp(-x^2) = " << I_h1 << " | EstErr = " << e_h1 << "\n";
@@ -172,8 +201,14 @@ int main() {
     auto h2 = [](double x){ return x/std::exp(x); };
     auto [I_h2,e_h2] = integrate_cc(h2,0,INFINITY);
     std::cout << "int_0^inf x/exp(x) = " << I_h2 << " | EstErr = " << e_h2 << "\n";
+}
 
-    std::cout << "\nDone. Data files: erf.svg.dat, erf_acc.svg.dat\n";
-
+// MAIN
+int main() {
+    std::cout << std::fixed << std::setprecision(8);
+    QuestionA();
+    QuestionB();
+    QuestionC();
+    std::cout << "\nDone. Data files: erf.dat, erf_acc.dat\n";
     return 0;
 }
