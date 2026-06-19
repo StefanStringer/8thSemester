@@ -116,26 +116,27 @@ void QuestionB() {
 void QuestionC() {
     std::cout << "---- QUESTION C: Three-body Figure-8 ----\n";
 
-    // 12-component vector: velocities + positions
+    // 12-component vector: positions first (x1,y1, x2,y2, x3,y3), then velocities (vx1,vy1...)
+    // Matches hint: z = {r1, r2, r3, v1, v2, v3}
     auto three_body_rhs = [](double t, lineq::vector z) -> lineq::vector {
         lineq::vector dz(12);
 
-        // Extract positions
-        double x1=z[6], y1=z[7];
-        double x2=z[8], y2=z[9];
-        double x3=z[10], y3=z[11];
+        // Extract Positions (indices 0-5)
+        double x1=z[0], y1=z[1];
+        double x2=z[2], y2=z[3];
+        double x3=z[4], y3=z[5];
 
-        // Extract velocities
-        double vx1=z[0], vy1=z[1];
-        double vx2=z[2], vy2=z[3];
-        double vx3=z[4], vy3=z[5];
+        // Extract Velocities (indices 6-11)
+        double vx1=z[6], vy1=z[7];
+        double vx2=z[8], vy2=z[9];
+        double vx3=z[10], vy3=z[11];
 
         auto accel = [](double x1,double y1,double x2,double y2){
             double dx = x2-x1, dy = y2-y1;
             double r3 = std::pow(dx*dx+dy*dy,1.5);
             return lineq::vector{dx/r3, dy/r3};
         };
-        // this is where we compute each accelerations
+
         lineq::vector a12 = accel(x1,y1,x2,y2);
         lineq::vector a13 = accel(x1,y1,x3,y3);
         lineq::vector a21 = accel(x2,y2,x1,y1);
@@ -143,41 +144,43 @@ void QuestionC() {
         lineq::vector a31 = accel(x3,y3,x1,y1);
         lineq::vector a32 = accel(x3,y3,x2,y2);
 
-        // dx/dt = velocities
-        dz[6]=vx1; dz[7]=vy1;
-        dz[8]=vx2; dz[9]=vy2;
-        dz[10]=vx3; dz[11]=vy3;
+        // dx/dt = velocities (store in indices 6-11)
+        dz[0]=vx1; dz[1]=vy1;
+        dz[2]=vx2; dz[3]=vy2;
+        dz[4]=vx3; dz[5]=vy3;
 
-        // dv/dt = accelerations
-        dz[0] = a12[0]+a13[0]; dz[1] = a12[1]+a13[1];
-        dz[2] = a21[0]+a23[0]; dz[3] = a21[1]+a23[1];
-        dz[4] = a31[0]+a32[0]; dz[5] = a31[1]+a32[1];
+        // dv/dt = accelerations (store in indices 0-5)
+        dz[6] = a12[0]+a13[0]; dz[7] = a12[1]+a13[1];
+        dz[8] = a21[0]+a23[0]; dz[9] = a21[1]+a23[1];
+        dz[10] = a31[0]+a32[0]; dz[11] = a31[1]+a32[1];
 
         return dz;
     };
 
-    // Initial conditions from Wikipedia figure-8 solution given in question C
+    // Initial conditions (from Wikipedia) - Ordered: Pos then Vel
     lineq::vector z0(12);
-    // velocities
-    z0[0] = 0.347111; z0[1] = 0.0;
-    z0[2] = -0.173556; z0[3] = 0.201532;
-    z0[4] = -0.173556; z0[5] = -0.201532;
-    // positions
-    z0[6] = 0.970004; z0[7] = -0.243087;
-    z0[8] = -0.970004; z0[9] = 0.243087;
-    z0[10] = 0.0; z0[11] = 0.0;
+    
+    // Positions (0-5)
+    z0[0] = 0.970004; z0[1] = -0.243087; // Body 1
+    z0[2] = -0.970004; z0[3] = 0.243087; // Body 2
+    z0[4] = 0.0; z0[5] = 0.0;            // Body 3
+    
+    // Velocities (6-11)
+    z0[6] = 0.347111; z0[7] = 0.0;       // Body 1
+    z0[8] = -0.173556; z0[9] = 0.201532; // Body 2
+    z0[10] = -0.173556; z0[11] = -0.201532; // Body 3
 
     double t0 = 0.0;
-    double tmax = 6.3259; // one period
+    double tmax = 6.3259; // One period
 
     auto [ts, zs] = driver(three_body_rhs, {t0,tmax}, z0, 0.01, 1e-6, 1e-6);
 
-    // Save positions for plotting
+    // Save positions for plotting (x1,y1, x2,y2, x3,y3)
     std::ofstream f("Question_C.dat");
     for(size_t i=0;i<ts.size();i++){
-        f << zs[i][6] << " " << zs[i][7] << " "
-          << zs[i][8] << " " << zs[i][9] << " "
-          << zs[i][10] << " " << zs[i][11] << "\n";
+        f << zs[i][0] << " " << zs[i][1] << " "   // Body 1
+          << zs[i][2] << " " << zs[i][3] << " "   // Body 2
+          << zs[i][4] << " " << zs[i][5] << "\n"; // Body 3
     }
     f.close();
 }
