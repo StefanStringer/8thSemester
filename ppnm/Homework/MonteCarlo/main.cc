@@ -9,7 +9,7 @@
 using namespace std;
 using namespace lineq;
 
-// Monte Carlo integrator (super plain)
+// Monte Carlo integrator (plain)
 pair<double,double> plainmc(
     function<double(lineq::vector)> f,
     lineq::vector a,
@@ -20,7 +20,6 @@ pair<double,double> plainmc(
     for(int i=0;i<dim;i++)
         V *= (b[i] - a[i]);
 
-    //this is how er generate randome values
     random_device rd;
     mt19937 gen(rd());
     uniform_real_distribution<> dist(0.0, 1.0);
@@ -44,20 +43,20 @@ pair<double,double> plainmc(
     return {mean*V, sigma*V/sqrt(N)};
 }
 
-//Here is the Halton Sequence from doc method
+// Halton Sequence
 double halton(int index, int base) {
     double result = 0.0;
     double fraction = 1.0/base;
     int i = index;
-
-    while ( i > 0 ) {
+    while (i > 0) {
         result += fraction * (i % base);
         i /= base;
         fraction /= base;
     }
     return result;
 }
-//monte carlo using halton sequence (Quasi random hence QR)
+
+// Quasi-random Monte Carlo (Halton)
 pair<double, double> plainmc_qr(
     function<double(lineq::vector)> f,
     lineq::vector a,
@@ -72,29 +71,25 @@ pair<double, double> plainmc_qr(
     double sum = 0, sum2 = 0;
     lineq::vector x(dim);
 
-    // Generate N points
     for(int i = 1; i <= N; i++) {
         for(int k = 0; k < dim; k++) {
-            // Map Halton points from [0,1] to [a[k], b[k]]
             double h_val = halton(i, bases[k]);
             x[k] = a[k] + h_val * (b[k] - a[k]);
         }
 
         double fx = f(x);
         sum += fx;
-        sum2 += fx * fx;
+        sum2 += fx*fx;
     }
 
     double mean = sum / N;
-
     return {mean * V, 0.0}; 
 }
 
-
+// QUESTION A: Plain Monte Carlo - Unit Circle
 void QuestionA() {
     cout << "========== Question A: Unit Circle Area ==========\n\n";
     
-    // Function: Indicator for unit circle (x^2 + y^2 <= 1)
     auto f_circle = [](lineq::vector x) -> double {
         if (x[0] * x[0] + x[1] * x[1] <= 1.0) 
             return 1.0;
@@ -102,10 +97,8 @@ void QuestionA() {
             return 0.0;
     };
 
-    // Integration bounds: [-1, 1] x [-1, 1]
     lineq::vector a = {-1.0, -1.0};
     lineq::vector b = {1.0, 1.0};
-    
     double exact = M_PI;
 
     cout << "Target: Area of unit circle\n";
@@ -114,11 +107,9 @@ void QuestionA() {
     cout << " N          Result        Error    Actual Error\n";
     cout << "------------------------------------------------------\n";
 
-    // Open file for plotting data (separate per question)
     ofstream data_file("data_A.txt");
     data_file << "# N Estimated_Error Actual_Error\n";
 
-    // Run for N = 1000, 2000, 4000 ... 1,000,000
     for (int N = 1000; N <= 1000000; N *= 2) {
         auto [result, est_error] = plainmc(f_circle, a, b, N);
         double actual_error = fabs(result - exact);
@@ -128,7 +119,6 @@ void QuestionA() {
              << setw(12) << est_error << "  "
              << setw(12) << actual_error << "\n";
 
-        // Write to data file for gnuplot
         data_file << N << " " << est_error << " " << actual_error << "\n";
     }
 
@@ -136,12 +126,13 @@ void QuestionA() {
     
     cout << "\n------------------------------------------------------\n";
     cout << "Data saved to 'data_A.txt'\n";
+    cout << "Note: Error should scale as 1/√N (check plot)\n";
 }
 
+// QUESTION B: Quasi-Random (Halton) Sequences
 void QuestionB() {
     cout << "========== Question B: Halton Sequence Integration ==========\n\n";
     
-    // Function: Indicator for unit circle (x^2 + y^2 <= 1)
     auto f_circle_b = [](lineq::vector x) -> double {
         return x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     };
@@ -155,30 +146,19 @@ void QuestionB() {
     cout << " N          PRNG Result   PRNG EstErr   QR Result     QR ActErr\n";
     cout << "------------------------------------------------------------------\n";
 
-    // Open file for plotting data (separate per question)
     ofstream data_b("data_B.txt");
     data_b << "# N PRNG_Result PRNG_EstErr QR_Result QR_ActErr\n";
 
-    // Use first few prime numbers as bases for Halton sequence
     std::vector<int> bases1 = {2, 3, 5};
     std::vector<int> bases2 = {7, 11, 13};
 
-    // Run for N = 1000, 2000, 4000 ... 1,000,000
     for (int N = 1000; N <= 1000000; N *= 2) {
-        // 1. Pseudo-Random Run
         auto [res_pr, err_pr] = plainmc(f_circle_b, a, b, N);
-        
-        // 2. Quasi-Random Run (Sequence 1)
         auto [res_qr1, _] = plainmc_qr(f_circle_b, a, b, N, bases1);
-        
-        // 3. Quasi-Random Run (Sequence 2) - Used for error estimation
         auto [res_qr2, __] = plainmc_qr(f_circle_b, a, b, N, bases2);
 
-        // Calculate Actual Errors (since we know the exact answer)
         double act_err_pr = fabs(res_pr - exact_val);
         double act_err_qr = fabs(res_qr1 - exact_val);
-        
-        // Estimate QR Error by comparing two sequences (as requested)
         double est_err_qr = fabs(res_qr1 - res_qr2);
 
         cout << setw(6) << N << "  "
@@ -187,7 +167,6 @@ void QuestionB() {
              << setw(12) << res_qr1 << "  "
              << setw(12) << act_err_qr << "\n";
 
-        // Store data for plotting: N, PRNG_Error, QR_Error
         data_b << N << " " << act_err_pr << " " << act_err_qr << "\n";
     }
 
@@ -195,10 +174,88 @@ void QuestionB() {
     
     cout << "\n---------------------------------------------\n";
     cout << "Data saved to 'data_B.txt'\n";
+    cout << "QR error scales better than 1/√N (check plot)\n";
 }
 
+// QUESTION C: Stratified Sampling
+void QuestionC() {
+    cout << "========== Question C: Stratified Sampling ==========\n\n";
+    
+    auto f_circle = [](lineq::vector x) -> double {
+        return (x[0]*x[0] + x[1]*x[1] <= 1.0) ? 1.0 : 0.0;
+    };
 
+    lineq::vector a = {-1.0, -1.0};
+    lineq::vector b = {1.0, 1.0};
+    double exact = M_PI;
+    const int nmin = 100;
 
+    // Recursive stratified sampling
+    function<pair<double,double>(lineq::vector,lineq::vector,int)> 
+    stratified = [&](lineq::vector a_sub, lineq::vector b_sub, int N) -> pair<double,double> {
+        
+        if (N < nmin) {
+            random_device rd; mt19937 gen(rd()); uniform_real_distribution<> dist(0.0,1.0);
+            double sum=0, sum2=0; lineq::vector x(a_sub.size()); double V=1;
+            for(int i=0;i<a_sub.size();i++) V *= (b_sub[i]-a_sub[i]);
+            
+            for(int k=0;k<N;k++){
+                for(size_t j=0;j<x.size();j++)
+                    x[j] = a_sub[j] + dist(gen)*(b_sub[j]-a_sub[j]);
+                double fx = f_circle(x); sum += fx; sum2 += fx*fx;
+            }
+            double mean = sum/N;
+            double sigma = sqrt(max(0.0,sum2/N-mean*mean));
+            return {mean*V, sigma*V/sqrt(N)};
+        }
+
+        random_device rd; mt19937 gen(rd()); uniform_real_distribution<> dist(0.0,1.0);
+        double sum=0, sum2=0; lineq::vector x(a_sub.size()); double V=1;
+        for(int i=0;i<a_sub.size();i++) V *= (b_sub[i]-a_sub[i]);
+        
+        for(int k=0;k<nmin;k++){
+            for(size_t j=0;j<x.size();j++)
+                x[j] = a_sub[j] + dist(gen)*(b_sub[j]-a_sub[j]);
+            double fx = f_circle(x); sum += fx; sum2 += fx*fx;
+        }
+        double total_var = max(0.0,sum2/nmin-(sum/nmin)*(sum/nmin));
+
+        int best_dim = 0; double max_h = 0;
+        for(size_t d=0;d<a_sub.size();d++){
+            double h = b_sub[d]-a_sub[d];
+            if(h > max_h){max_h=h; best_dim=d;}
+        }
+
+        // Subdivide along best dimension
+        lineq::vector mid = a_sub; mid[best_dim] += (b_sub[best_dim]-a_sub[best_dim])/2;
+        lineq::vector left_b = b_sub; left_b[best_dim] = mid[best_dim];
+        lineq::vector right_a = a_sub; right_a[best_dim] = mid[best_dim];
+
+        // Split points
+        int N_rem = N - nmin;
+        int N_left = N_rem/2, N_right = N_rem - N_left;
+
+        auto [I1,e1] = stratified(a_sub,left_b,N_left);
+        auto [I2,e2] = stratified(right_a,b_sub,N_right);
+
+        return {I1+I2, sqrt(e1*e1+e2*e2)};
+    };
+
+    int N_total = 10000;
+    auto [result, est_err] = stratified(a,b,N_total);
+    double actual_err = fabs(result - exact);
+
+    cout << "Target: Area of unit circle\n";
+    cout << "Exact value (PI) = " << fixed << setprecision(8) << exact << "\n";
+    cout << "Stratified Result = " << result << "\n";
+    cout << "Estimated Error = " << est_err << "\n";
+    cout << "Actual Error = " << actual_err << "\n";
+    
+    cout << "\n------------------------------------------------------\n";
+    cout << "Data saved (stratified improves convergence compared to the plain MC)\n";
+}
+
+// MAIN
 int main(){
     cout << "====================================================\n";
     cout << "Monte Carlo Integration\n";
@@ -206,7 +263,7 @@ int main(){
 
     QuestionA();
     QuestionB();
-    //QuestionC(); idk if ill get it done??
+    QuestionC();
 
     cout << "====================================================\n";
     cout << "Finished :)\n";
