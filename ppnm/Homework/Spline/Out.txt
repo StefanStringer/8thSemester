@@ -1,6 +1,31 @@
 Question A: Linear spline
 
+ Look at .svg files for plots pretaining to question C
+
+ Includes a fig_linear.svg for answer to A.
+
 Question B: Quadratic spline
 
+Verification Test Cases:
+--------------------------
+Test yi=1 (Expected b=0, c=0):
+  Calculated: b=0, c=0
+  Error: 0 (b), 0 (c)
+  PASS
+
+Test yi=xi (Expected b=1, c=0):
+  Calculated: b=1, c=0
+  Error: 0 (b), 0 (c)
+  PASS
+
+Test yi=xi^2 (Reconstruction Error at nodes):
+  Sum of absolute errors at nodes: 0
+  PASS
+
+Plot 'fig_quadratic.svg' shows the spline fit.
 Question C: Cubic spline
+
+ Look at .svg files for plots pretaining to question C
+
+ Includes a fig_cubic.svg and a fig_total.svg for comparison of all splines.
 

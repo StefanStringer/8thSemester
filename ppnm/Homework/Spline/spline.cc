@@ -6,19 +6,15 @@ namespace Spline {
 //  Binary search
 //  Finds interval i such that x[i] <= z < x[i+1]
 
-int binsearch(const vector& x,double z){
-
-    int i=0;
-    int j=x.size()-1;
-
+int binsearch(const vector& x, double z){
+    if(z >= x[x.size()-1]) return x.size()-2;
+    if(z <= x[0]) return 0;
+    
+    int i=0, j=x.size()-1;
     while(j-i>1){
-
         int mid=(i+j)/2;
-
-        if(z>x[mid]) i=mid;
-        else j=mid;
+        if(z>x[mid]) i=mid; else j=mid;
     }
-
     return i;
 }
 
@@ -63,6 +59,7 @@ double linterp_integral(const vector& x,const vector& y,double z){
 
 //Question B SPLINE PART quadratic spline interpolation with derivative and
 // Quadratic spline constructor
+//Got some help to get test cases proberly done
 qspline::qspline(const vector& xs,const vector& ys)
 : x(xs),y(ys),b(xs.size()-1),c(xs.size()-1){
 
