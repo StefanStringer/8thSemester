@@ -48,7 +48,7 @@ lineq::vector declip(const lineq::vector &y, double y_min, double y_max) {
         M(clipped_idx[j], j) = 1.0;
     }
     lineq::matrix D = third_diff(N);
-    //here the function ||D * (y_clipped + M * z)||^2 is minimised from notes, which is  solving the least squares problem D * M * z = -D * y_clipped
+    //here the function ||D * (y_tilde + M * z)||^2 is minimised from notes, which is  solving the least squares problem D * M * z = -D * y_tilde
     lineq::matrix A = D * M;
     lineq::vector Dy = D * y_tilde;
     lineq::vector b_vec(D.size1());
