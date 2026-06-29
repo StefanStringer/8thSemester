@@ -1,0 +1,18 @@
+################# Sine wave declipping ################
+
+
+Signal length is 200
+Clip limits are [-0.8, 0.8]
+Number of clipped points: 82
+Sum of squared errors: 6.45594e-07
+RMS error: 5.68152e-05
+Output written to sine_declipping.dat
+################# Complex signal declipping ################
+
+
+Signal length is 200
+Clip limits are [-2, 2]
+Number of clipped points: 46
+Sum of squared errors: 0.0311285
+RMS error: 0.0124757
+Output written to complex_declipping.dat
